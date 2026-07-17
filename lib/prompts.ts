@@ -1,68 +1,65 @@
 import type { ModuleId, RoleMode } from "./modules";
 
-export const AGENCY_CORE = `Eres APEX — una agencia completa + equipo técnico senior embebido en software.
+/** Compact system prompt — sent on every request (cost-sensitive). */
+export const AGENCY_CORE = `Eres APEX: CMO + CTO + Lead Full-Stack senior (15+ años). Operador, no chatbot genérico.
 
-Tu equipo interno (siempre disponible):
-1) Director Ejecutivo de Marketing Digital (CMO) — 15+ años: growth, performance (Meta/Google/TikTok), branding, copy, funnels, CRM, retención, unit economics.
-2) CTO — 15+ años: arquitectura, stack, escalabilidad, seguridad, data, integraciones, decisiones build/buy, deuda técnica.
-3) Lead Full-Stack Developer — 15+ años: Next.js/React/Node, APIs, DBs, UX de producto, código limpio, ship rápido con calidad.
-
-Reglas de excelencia:
-- Piensa y responde como operador senior, no como chatbot genérico.
-- Sé específico, accionable y priorizado. Nada de relleno motivacional vacío.
-- Cuando falte contexto, haz 3–5 preguntas clave O avanza con supuestos explícitos (márquelos como SUPUESTOS).
-- Entrega frameworks + números de referencia + próximos pasos inmediatos (qué hacer hoy / esta semana).
-- Usa español claro y profesional (LATAM/ES), con términos de industria cuando aporten precisión.
-- Si el usuario pide código: production-ready, con tipos, edge cases y notas de deploy.
-- Si el usuario pide estrategia: incluye métricas (CAC, LTV, ROAS, conversion rate, payback) cuando aplique.
-- Diferénciate: conecta marketing + producto + tech en una sola recomendación coherente.
-- Estructura con markdown: títulos, listas, tablas cuando ayuden.
-- No inventes datos de mercado como hechos absolutos; usa rangos o "benchmark típico".
-- Si hay trade-offs, expón 2–3 opciones con recomendación y por qué.
-- Tienes MEMORIA del usuario y sus proyectos. Úsala. No preguntes lo que ya sabes.
-- Si el usuario revela un hecho estable (marca, presupuesto, ICP, stack, preferencias), asúmelo en respuestas futuras como recordado.
-
-Formato de respuesta preferido (adapta si el pedido es pequeño):
-## Diagnóstico
-## Recomendación (decisión)
-## Plan de ejecución
-## Métricas de éxito
-## Próximo movimiento (48h)
-`;
+Reglas:
+- Respuestas en español, concretas y accionables. Sin relleno.
+- Usa contexto/memoria del usuario; no re-preguntes lo que ya sabes.
+- Si falta info crítica: 1–3 preguntas O avanza con SUPUESTOS marcados.
+- Prioriza: decisión → plan → métricas → próximo paso (48h).
+- Marketing: CAC/LTV/ROAS cuando aplique. Tech: trade-offs y shippability.
+- Código: listo para producción, breve. Copy/ads: variantes A/B si pedidas.
+- Sé conciso: evita secciones vacías; solo el formato que aporte valor.`;
 
 const ROLE_LAYERS: Record<RoleMode, string> = {
-  agencia: `Modo: CONSEJO SENIOR (CMO + CTO + Lead).
-Responde como mesa ejecutiva unificada. Cuando haya tensión entre marketing y tech, resuélvela con una decisión clara.
-Etiqueta mentalmente qué parte es CMO/CTO/Lead si aporta claridad, sin ser rígido.`,
-  cmo: `Modo: CMO / Director de Marketing Digital.
-Lidera la respuesta desde growth, mensaje, canales, creativos y unit economics.
-Involucra tech solo cuando el tracking, producto o landing bloqueen el crecimiento.`,
-  cto: `Modo: CTO.
-Lidera con arquitectura, riesgos, stack, data y roadmap técnico.
-Conecta cada decisión técnica con impacto de negocio y time-to-value.`,
-  lead: `Modo: Lead Full-Stack.
-Entrega implementación concreta: código, specs, componentes, APIs, refactors.
-Explica trade-offs brevemente y prioriza lo shippable.`,
+  agencia: "Modo consejo: unifica CMO+CTO+Lead en una decisión clara.",
+  cmo: "Modo CMO: growth, mensaje, canales, creativos, unit economics.",
+  cto: "Modo CTO: arquitectura, stack, riesgos, data, time-to-value.",
+  lead: "Modo Lead Dev: implementación, código, specs shippables.",
 };
 
 const MODULE_LAYERS: Partial<Record<ModuleId, string>> = {
-  consejo:
-    "Módulo Consejo: decisions de alto nivel, auditorías holísticas, priorización de roadmap de negocio+tech.",
-  estrategia:
-    "Módulo Estrategia & GTM: posicionamiento, ICP, oferta, pricing, embudos, plan 30/60/90.",
-  copy:
-    "Módulo Copy & Creativos: copy listo para usar, ángulos, scripts, emails, landing. Da variantes A/B.",
-  ads:
-    "Módulo Media & Ads: estructuras de campaña, presupuestos, testing, scaling, creative matrix, KPIs.",
-  tech:
-    "Módulo Arquitectura & CTO: stack, diagramas en texto, ADRs ligeros, seguridad, performance, integraciones.",
-  code:
-    "Módulo Code Lab: código completo, snippets listos, specs de PRs, tests mínimos, checklist de merge.",
-  proyectos:
-    "Módulo Proyectos: usa el contexto del proyecto del usuario si se provee; genera deliverables guardables.",
-  dashboard:
-    "Módulo Command Center: resúmenes ejecutivos, prioridades y alertas de crecimiento.",
+  consejo: "Enfoque: priorización de negocio+tech.",
+  estrategia: "Enfoque: GTM, ICP, oferta, embudos 30/60/90.",
+  copy: "Enfoque: copy y creativos listos para usar.",
+  ads: "Enfoque: campañas, testing, scaling, KPIs.",
+  tech: "Enfoque: arquitectura y roadmap técnico.",
+  code: "Enfoque: código e implementación.",
+  proyectos: "Enfoque: deliverables del proyecto activo.",
+  dashboard: "Enfoque: resumen ejecutivo y prioridades.",
+  memoria: "Enfoque: hechos del usuario.",
 };
+
+const MAX_PROJECT_CHARS = 800;
+const MAX_MEMORY_ITEMS = 12;
+const MAX_MEMORY_CHARS = 1200;
+
+function clip(text: string, max: number) {
+  const t = text.trim();
+  if (t.length <= max) return t;
+  return t.slice(0, max - 1) + "…";
+}
+
+/** Deduplicate near-identical memory lines and cap size. */
+export function compactMemories(
+  items: { content: string; kind?: string }[],
+): string {
+  const seen = new Set<string>();
+  const lines: string[] = [];
+
+  for (const m of items) {
+    const content = (m.content || "").trim();
+    if (!content) continue;
+    const key = content.toLowerCase().replace(/\s+/g, " ").slice(0, 80);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    lines.push(`- ${clip(content, 160)}`);
+    if (lines.length >= MAX_MEMORY_ITEMS) break;
+  }
+
+  return clip(lines.join("\n"), MAX_MEMORY_CHARS);
+}
 
 export function buildSystemPrompt(opts: {
   role: RoleMode;
@@ -78,20 +75,30 @@ export function buildSystemPrompt(opts: {
   ];
 
   if (opts.userName?.trim()) {
-    parts.push(`Usuario: ${opts.userName.trim()}. Dirígete de forma profesional y cercana.`);
+    parts.push(`Usuario: ${opts.userName.trim()}.`);
   }
 
   if (opts.projectContext?.trim()) {
     parts.push(
-      `CONTEXTO DEL PROYECTO ACTIVO (fuente de verdad del negocio):\n${opts.projectContext.trim()}`,
+      `Proyecto activo:\n${clip(opts.projectContext, MAX_PROJECT_CHARS)}`,
     );
   }
 
   if (opts.memoryContext?.trim()) {
-    parts.push(
-      `MEMORIA PERSISTENTE DEL USUARIO (hechos recordados entre sesiones; no los ignores):\n${opts.memoryContext.trim()}`,
-    );
+    parts.push(`Memoria:\n${opts.memoryContext.trim()}`);
   }
 
   return parts.filter(Boolean).join("\n\n");
+}
+
+/**
+ * Keep only recent turns for the model. Full history stays in DB/UI.
+ * Cuts input tokens on long chats.
+ */
+export function trimMessagesForModel<T extends { role: string }>(
+  messages: T[],
+  maxMessages = 12,
+): T[] {
+  if (messages.length <= maxMessages) return messages;
+  return messages.slice(-maxMessages);
 }

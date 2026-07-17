@@ -4,12 +4,23 @@ import {
   streamText,
   type UIMessage,
 } from "ai";
-import { buildSystemPrompt } from "@/lib/prompts";
+import {
+  buildSystemPrompt,
+  compactMemories,
+  trimMessagesForModel,
+} from "@/lib/prompts";
 import type { ModuleId, RoleMode } from "@/lib/modules";
 import { createClient, getAuthUser } from "@/lib/supabase/server";
 import { projectToContext, type Project } from "@/lib/types";
 
 export const maxDuration = 60;
+
+/** Cap assistant verbosity (output tokens). */
+const MAX_OUTPUT_TOKENS = 2500;
+/** Only last N UI messages go to the model. */
+const MAX_HISTORY_MESSAGES = 12;
+/** Max memories loaded from DB. */
+const MEMORY_FETCH_LIMIT = 20;
 
 function publicErrorMessage(error: unknown): string {
   const msg =
@@ -66,14 +77,13 @@ export async function POST(req: Request) {
 
   try {
     const body = await req.json();
-    const messages = body.messages as UIMessage[];
+    const messages = (body.messages as UIMessage[]) || [];
     const role = (body.role as RoleMode) || "agencia";
     const moduleId = (body.moduleId as ModuleId) || "consejo";
     let projectContext = (body.projectContext as string) || "";
 
     const supabase = await createClient();
 
-    // Profile + active project from DB (source of truth)
     const { data: profile } = await supabase
       .from("profiles")
       .select("full_name, active_project_id")
@@ -90,18 +100,21 @@ export async function POST(req: Request) {
       if (project) projectContext = projectToContext(project as Project);
     }
 
-    // Long-term memory for this user (global + active project)
-    let memQuery = supabase
+    // Prefer project-linked memories, then general — compact before inject
+    const { data: memories } = await supabase
       .from("memories")
-      .select("content, kind, project_id")
+      .select("content, kind, project_id, updated_at")
       .eq("user_id", user.id)
       .order("updated_at", { ascending: false })
-      .limit(40);
+      .limit(MEMORY_FETCH_LIMIT);
 
-    const { data: memories } = await memQuery;
-    const memoryContext = (memories || [])
-      .map((m) => `- [${m.kind}] ${m.content}`)
-      .join("\n");
+    const activePid = profile?.active_project_id ?? null;
+    const sorted = [...(memories || [])].sort((a, b) => {
+      const aHit = activePid && a.project_id === activePid ? 0 : 1;
+      const bHit = activePid && b.project_id === activePid ? 0 : 1;
+      return aHit - bHit;
+    });
+    const memoryContext = compactMemories(sorted);
 
     const system = buildSystemPrompt({
       role,
@@ -111,10 +124,21 @@ export async function POST(req: Request) {
       userName: profile?.full_name || user.email || null,
     });
 
+    // Full thread stays in the UI/DB; model only sees a recent window
+    const modelMessages = trimMessagesForModel(messages, MAX_HISTORY_MESSAGES);
+
     const result = streamText({
-      model: xai.responses("grok-4.5"),
+      // Chat endpoint is cheaper/faster for multi-turn than full reasoning responses
+      model: xai("grok-4.5"),
       system,
-      messages: await convertToModelMessages(messages),
+      messages: await convertToModelMessages(modelMessages),
+      maxOutputTokens: MAX_OUTPUT_TOKENS,
+      providerOptions: {
+        xai: {
+          // Avoid hidden reasoning tokens when the API supports it
+          reasoningEffort: "none",
+        },
+      },
     });
 
     return result.toUIMessageStreamResponse({
