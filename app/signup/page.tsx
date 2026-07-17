@@ -13,6 +13,7 @@ export default function SignupPage() {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [phase, setPhase] = useState<Phase>("form");
@@ -21,10 +22,20 @@ export default function SignupPage() {
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
-    setLoading(true);
 
     const cleanEmail = email.trim().toLowerCase();
     const name = fullName.trim();
+
+    if (password.length < 8) {
+      setError("La contraseña debe tener al menos 8 caracteres.");
+      return;
+    }
+    if (password !== confirmPassword) {
+      setError("Las contraseñas no coinciden.");
+      return;
+    }
+
+    setLoading(true);
 
     try {
       const supabase = createClient();
@@ -186,6 +197,19 @@ export default function SignupPage() {
               onChange={(e) => setPassword(e.target.value)}
               className="mt-1.5 w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none focus:border-amber-400/40 focus:ring-2 focus:ring-amber-400/20"
               placeholder="Mínimo 8 caracteres"
+            />
+          </label>
+          <label className="block text-sm text-zinc-400">
+            Confirmar contraseña
+            <input
+              type="password"
+              required
+              minLength={8}
+              autoComplete="new-password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              className="mt-1.5 w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none focus:border-amber-400/40 focus:ring-2 focus:ring-amber-400/20"
+              placeholder="Repite la contraseña"
             />
           </label>
 
