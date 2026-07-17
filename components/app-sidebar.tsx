@@ -55,7 +55,7 @@ export function AppSidebar({ variant = "desktop", onNavigate }: Props) {
     >
       <div className="border-b border-white/10 px-4 pb-4 pt-[max(1.25rem,env(safe-area-inset-top))]">
         <Link
-          href="/"
+          href="/app"
           onClick={onNavigate}
           className="group flex items-center gap-2.5 pr-10 md:pr-0"
         >
