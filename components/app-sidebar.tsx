@@ -19,19 +19,31 @@ export function AppSidebar({ variant = "desktop", onNavigate }: Props) {
   const router = useRouter();
   const [projectName, setProjectName] = useState<string | null>(null);
   const [userLabel, setUserLabel] = useState<string | null>(null);
+  const [planName, setPlanName] = useState<string>("Gratis");
 
   useEffect(() => {
     let cancelled = false;
     async function load() {
       try {
-        const res = await fetch("/api/profile");
-        if (!res.ok) return;
-        const data = await res.json();
-        if (cancelled) return;
-        setProjectName(data.activeProject?.name ?? null);
-        setUserLabel(
-          data.profile?.full_name || data.user?.email?.split("@")[0] || null,
-        );
+        const [profileRes, billRes] = await Promise.all([
+          fetch("/api/profile"),
+          fetch("/api/billing/status"),
+        ]);
+        if (profileRes.ok) {
+          const data = await profileRes.json();
+          if (!cancelled) {
+            setProjectName(data.activeProject?.name ?? null);
+            setUserLabel(
+              data.profile?.full_name ||
+                data.user?.email?.split("@")[0] ||
+                null,
+            );
+          }
+        }
+        if (billRes.ok) {
+          const bill = await billRes.json();
+          if (!cancelled) setPlanName(bill.planName || "Gratis");
+        }
       } catch {
         /* ignore */
       }
@@ -123,6 +135,13 @@ export function AppSidebar({ variant = "desktop", onNavigate }: Props) {
           <p className="truncate text-sm text-zinc-300">
             {userLabel ?? "Cuenta"}
           </p>
+          <Link
+            href="/app/planes"
+            onClick={onNavigate}
+            className="mt-1.5 inline-flex items-center rounded-full border border-amber-400/30 bg-amber-400/10 px-2 py-0.5 text-[11px] font-medium text-amber-300 hover:bg-amber-400/15"
+          >
+            Plan {planName}
+          </Link>
           <button
             type="button"
             onClick={() => void signOut()}

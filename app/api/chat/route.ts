@@ -12,6 +12,7 @@ import {
 import type { ModuleId, RoleMode } from "@/lib/modules";
 import { createClient, getAuthUser } from "@/lib/supabase/server";
 import { projectToContext, type Project } from "@/lib/types";
+import { assertCanChat, incrementMessageUsage } from "@/lib/billing";
 
 export const maxDuration = 60;
 
@@ -83,6 +84,28 @@ export async function POST(req: Request) {
     let projectContext = (body.projectContext as string) || "";
 
     const supabase = await createClient();
+
+    const gate = await assertCanChat(supabase, user.id, moduleId);
+    if (!gate.ok) {
+      return Response.json(
+        {
+          error: gate.message,
+          code: gate.code,
+          plan: gate.plan.id,
+          upgradeUrl: "/app/planes",
+          used: gate.used,
+          limit: gate.limit,
+        },
+        { status: 402 },
+      );
+    }
+
+    // Count this request toward the daily quota
+    try {
+      await incrementMessageUsage(supabase, user.id);
+    } catch {
+      /* usage table may not exist yet */
+    }
 
     const { data: profile } = await supabase
       .from("profiles")

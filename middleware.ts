@@ -17,5 +17,6 @@ export const config = {
     "/api/conversations/:path*",
     "/api/memories/:path*",
     "/api/profile/:path*",
+    "/api/billing/:path*",
   ],
 };

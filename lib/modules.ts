@@ -7,7 +7,8 @@ export type ModuleId =
   | "tech"
   | "code"
   | "proyectos"
-  | "memoria";
+  | "memoria"
+  | "planes";
 
 export type RoleMode = "agencia" | "cmo" | "cto" | "lead";
 
@@ -27,7 +28,8 @@ export interface ModuleDef {
     | "cpu"
     | "code"
     | "folder"
-    | "brain";
+    | "brain"
+    | "card";
   starters: string[];
 }
 
@@ -152,6 +154,16 @@ export const MODULES: ModuleDef[] = [
       "Lo que APEX recuerda de ti entre sesiones (privado, solo tuyo).",
     role: "agencia",
     icon: "brain",
+    starters: [],
+  },
+  {
+    id: "planes",
+    href: "/app/planes",
+    label: "Planes",
+    short: "Planes",
+    description: "Gratis, Pro y Agency. Desbloquea más mensajes y módulos.",
+    role: "agencia",
+    icon: "card",
     starters: [],
   },
 ];

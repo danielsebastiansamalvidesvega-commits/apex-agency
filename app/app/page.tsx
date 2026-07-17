@@ -36,13 +36,21 @@ export default function DashboardPage() {
             Ideas de negocio, ventas, web o producto. Una conversación, un plan
             claro para avanzar.
           </p>
-          <Link
-            href="/app/consejo"
-            className="mt-4 inline-flex min-h-[44px] items-center gap-2 rounded-xl bg-amber-400 px-4 py-2.5 text-sm font-semibold text-black transition hover:bg-amber-300"
-          >
-            Abrir Consejo
-            <ArrowRight className="h-4 w-4" />
-          </Link>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Link
+              href="/app/consejo"
+              className="inline-flex min-h-[44px] items-center gap-2 rounded-xl bg-amber-400 px-4 py-2.5 text-sm font-semibold text-black transition hover:bg-amber-300"
+            >
+              Abrir Consejo
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+            <Link
+              href="/app/planes"
+              className="inline-flex min-h-[44px] items-center gap-2 rounded-xl border border-white/15 bg-white/5 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-white/10"
+            >
+              Ver planes
+            </Link>
+          </div>
         </div>
 
         <div className="space-y-3">
@@ -55,9 +63,9 @@ export default function DashboardPage() {
           </div>
           <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
             <Shield className="h-4 w-4 text-sky-400" />
-            <p className="mt-2 text-sm font-medium text-white">Tecnología</p>
+            <p className="mt-2 text-sm font-medium text-white">Planes</p>
             <p className="mt-1 text-xs text-zinc-500">
-              Decisiones técnicas claras, sin complicaciones innecesarias.
+              Gratis para empezar. Pro y Agency cuando necesites más potencia.
             </p>
           </div>
         </div>

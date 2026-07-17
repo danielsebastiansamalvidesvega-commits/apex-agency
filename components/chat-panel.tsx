@@ -336,6 +336,17 @@ export function ChatPanel({ moduleId, role, title, subtitle, starters }: Props) 
           <p className="mt-0.5 text-xs text-red-200/90 sm:text-sm">
             {error.message || "Error al contactar el modelo."}
           </p>
+          {(error.message?.includes("plan") ||
+            error.message?.includes("límite") ||
+            error.message?.includes("Mejora") ||
+            error.message?.includes("402")) && (
+            <a
+              href="/app/planes"
+              className="mt-2 inline-flex text-xs font-semibold text-amber-300 underline-offset-2 hover:underline"
+            >
+              Ver planes y mejorar →
+            </a>
+          )}
         </div>
       )}
 

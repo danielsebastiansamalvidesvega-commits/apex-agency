@@ -36,13 +36,20 @@ export async function updateSession(request: NextRequest) {
   const path = request.nextUrl.pathname;
   const isApp = path.startsWith("/app");
   const isAuthPage = path === "/login" || path === "/signup";
+  // Webhook de Stripe no usa sesión de usuario
+  if (path.startsWith("/api/billing/webhook")) {
+    return supabaseResponse;
+  }
+
   const isProtectedApi =
     path.startsWith("/api/chat") ||
     path.startsWith("/api/projects") ||
     path.startsWith("/api/deliverables") ||
     path.startsWith("/api/conversations") ||
     path.startsWith("/api/memories") ||
-    path.startsWith("/api/profile");
+    path.startsWith("/api/profile") ||
+    (path.startsWith("/api/billing") &&
+      !path.startsWith("/api/billing/webhook"));
 
   if (!user && (isApp || isProtectedApi)) {
     if (isProtectedApi) {
