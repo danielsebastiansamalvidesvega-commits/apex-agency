@@ -1,17 +1,33 @@
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
-  const nextRaw = searchParams.get("next") ?? "/app";
-  const next = nextRaw.startsWith("/") ? nextRaw : "/app";
-  const oauthError = searchParams.get("error_description") || searchParams.get("error");
+  const oauthError =
+    searchParams.get("error_description") || searchParams.get("error");
+
+  const cookieStore = await cookies();
+  const nextCookie = cookieStore.get("apex_auth_next")?.value;
+  let next = "/app";
+  if (nextCookie) {
+    try {
+      const decoded = decodeURIComponent(nextCookie);
+      if (decoded.startsWith("/")) next = decoded;
+    } catch {
+      next = "/app";
+    }
+  }
+  const nextFromQuery = searchParams.get("next");
+  if (nextFromQuery?.startsWith("/")) next = nextFromQuery;
 
   if (oauthError) {
-    return NextResponse.redirect(
+    const res = NextResponse.redirect(
       `${origin}/login?error=${encodeURIComponent(oauthError)}`,
     );
+    res.cookies.set("apex_auth_next", "", { path: "/", maxAge: 0 });
+    return res;
   }
 
   if (code) {
@@ -41,12 +57,16 @@ export async function GET(request: Request) {
         );
       }
 
-      return NextResponse.redirect(`${origin}${next}`);
+      const res = NextResponse.redirect(`${origin}${next}`);
+      res.cookies.set("apex_auth_next", "", { path: "/", maxAge: 0 });
+      return res;
     }
 
-    return NextResponse.redirect(
+    const res = NextResponse.redirect(
       `${origin}/login?error=${encodeURIComponent(error.message)}`,
     );
+    res.cookies.set("apex_auth_next", "", { path: "/", maxAge: 0 });
+    return res;
   }
 
   return NextResponse.redirect(`${origin}/login?error=auth`);

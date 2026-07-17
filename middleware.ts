@@ -10,6 +10,7 @@ export const config = {
     "/app/:path*",
     "/login",
     "/signup",
+    "/auth/callback",
     "/api/chat/:path*",
     "/api/projects/:path*",
     "/api/deliverables/:path*",

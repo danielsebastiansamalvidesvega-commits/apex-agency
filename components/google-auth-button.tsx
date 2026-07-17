@@ -45,23 +45,47 @@ export function GoogleAuthButton({
     try {
       const supabase = createClient();
       const origin = window.location.origin;
-      const { error: err } = await supabase.auth.signInWithOAuth({
+      const safeNext = next.startsWith("/") ? next : "/app";
+
+      // Cookie so callback can redirect without putting ?next= in allow-list
+      document.cookie = `apex_auth_next=${encodeURIComponent(safeNext)}; Path=/; Max-Age=600; SameSite=Lax`;
+
+      const { data, error: err } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${origin}/auth/callback?next=${encodeURIComponent(next)}`,
+          // Must match exactly a Redirect URL in Supabase Auth settings
+          redirectTo: `${origin}/auth/callback`,
           queryParams: {
             access_type: "offline",
             prompt: "select_account",
           },
         },
       });
+
       if (err) {
-        setError(err.message);
+        const msg = err.message.toLowerCase();
+        if (msg.includes("provider is not enabled") || msg.includes("validation")) {
+          setError(
+            "Google no está activado aún. En Supabase: Authentication → Providers → Google (Client ID + Secret).",
+          );
+        } else {
+          setError(err.message);
+        }
         setLoading(false);
+        return;
       }
-      // On success the browser redirects to Google
+
+      if (data?.url) {
+        window.location.assign(data.url);
+        return;
+      }
+
+      setError("No se pudo iniciar el flujo de Google.");
+      setLoading(false);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "No se pudo conectar con Google");
+      setError(
+        e instanceof Error ? e.message : "No se pudo conectar con Google",
+      );
       setLoading(false);
     }
   }
@@ -81,14 +105,16 @@ export function GoogleAuthButton({
         )}
         {loading ? "Conectando con Google…" : label}
       </button>
-      {error && (
-        <p className="text-center text-xs text-red-300">{error}</p>
-      )}
+      {error && <p className="text-center text-xs text-red-300">{error}</p>}
     </div>
   );
 }
 
-export function AuthDivider({ text = "o continúa con email" }: { text?: string }) {
+export function AuthDivider({
+  text = "o continúa con email",
+}: {
+  text?: string;
+}) {
   return (
     <div className="relative my-6">
       <div className="absolute inset-0 flex items-center">
