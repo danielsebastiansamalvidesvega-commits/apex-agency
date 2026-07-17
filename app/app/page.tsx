@@ -7,22 +7,21 @@ export default function DashboardPage() {
   const modules = MODULES.filter((m) => m.id !== "dashboard");
 
   return (
-    <div className="h-full overflow-y-auto">
-      <div className="border-b border-white/10 px-6 py-6">
+    <div className="h-full overflow-y-auto overscroll-contain">
+      <div className="border-b border-white/10 px-4 py-5 sm:px-6 sm:py-6">
         <p className="text-xs font-medium uppercase tracking-wider text-amber-400/90">
           Command Center
         </p>
-        <h1 className="mt-1 text-2xl font-semibold tracking-tight text-white">
+        <h1 className="mt-1 text-xl font-semibold tracking-tight text-white sm:text-2xl">
           Bienvenido a APEX
         </h1>
         <p className="mt-2 max-w-2xl text-sm text-zinc-400">
           Operas con un equipo senior unificado: marketing digital, arquitectura
-          y desarrollo full-stack. Elige un módulo o abre el Consejo para una
-          decisión holística.
+          y desarrollo full-stack. Elige un módulo o abre el Consejo.
         </p>
       </div>
 
-      <div className="grid gap-4 p-6 lg:grid-cols-3">
+      <div className="grid gap-3 p-4 sm:gap-4 sm:p-6 lg:grid-cols-3">
         <div className="rounded-2xl border border-amber-400/25 bg-gradient-to-br from-amber-400/15 to-transparent p-5 lg:col-span-2">
           <div className="flex items-center gap-2 text-amber-300">
             <Rocket className="h-4 w-4" />
@@ -64,14 +63,14 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      <div className="px-6 pb-8">
+      <div className="px-4 pb-6 sm:px-6 sm:pb-8">
         <h3 className="mb-3 text-sm font-medium text-zinc-400">Módulos</h3>
-        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-2.5 sm:grid-cols-2 sm:gap-3 xl:grid-cols-3">
           {modules.map((m) => (
             <Link
               key={m.id}
               href={m.href}
-              className="group rounded-2xl border border-white/10 bg-white/[0.02] p-4 transition hover:border-amber-400/35 hover:bg-amber-400/5"
+              className="group rounded-2xl border border-white/10 bg-white/[0.02] p-4 transition active:scale-[0.99] hover:border-amber-400/35 hover:bg-amber-400/5"
             >
               <ModuleIcon
                 name={m.icon}

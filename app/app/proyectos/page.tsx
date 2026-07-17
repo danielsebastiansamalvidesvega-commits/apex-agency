@@ -130,9 +130,11 @@ export default function ProyectosPage() {
   );
 
   return (
-    <div className="h-full overflow-y-auto">
-      <header className="border-b border-white/10 px-6 py-5">
-        <h1 className="text-xl font-semibold text-white">Proyectos</h1>
+    <div className="h-full overflow-y-auto overscroll-contain">
+      <header className="border-b border-white/10 px-4 py-4 sm:px-6 sm:py-5">
+        <h1 className="text-lg font-semibold text-white sm:text-xl">
+          Proyectos
+        </h1>
         <p className="mt-1 max-w-2xl text-sm text-zinc-400">
           Workspaces privados por marca o cliente. El proyecto activo se
           inyecta en el chat y alimenta la memoria de APEX.
@@ -148,7 +150,7 @@ export default function ProyectosPage() {
       {loading ? (
         <p className="p-6 text-sm text-zinc-500">Cargando tus proyectos…</p>
       ) : (
-        <div className="grid gap-6 p-6 xl:grid-cols-2">
+        <div className="grid gap-5 p-4 sm:gap-6 sm:p-6 xl:grid-cols-2">
           <section>
             <form
               onSubmit={onSubmit}

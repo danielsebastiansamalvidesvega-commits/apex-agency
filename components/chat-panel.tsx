@@ -61,7 +61,6 @@ export function ChatPanel({ moduleId, role, title, subtitle, starters }: Props) 
 
   const busy = status === "submitted" || status === "streaming";
 
-  // Load profile + conversation history
   useEffect(() => {
     let cancelled = false;
 
@@ -117,7 +116,7 @@ export function ChatPanel({ moduleId, role, title, subtitle, starters }: Props) 
           lastSavedCount.current = uiMessages.length;
         }
       } catch {
-        /* ignore load errors — user may still chat if session ok */
+        /* ignore */
       } finally {
         if (!cancelled) setHydrated(true);
       }
@@ -129,7 +128,6 @@ export function ChatPanel({ moduleId, role, title, subtitle, starters }: Props) 
     };
   }, [moduleId, setMessages]);
 
-  // Persist new messages when a turn finishes
   useEffect(() => {
     if (!conversationId || !hydrated) return;
     if (busy) return;
@@ -216,64 +214,69 @@ export function ChatPanel({ moduleId, role, title, subtitle, starters }: Props) 
 
   return (
     <div className="flex h-full min-h-0 flex-col">
-      <header className="flex flex-wrap items-start justify-between gap-3 border-b border-white/10 px-5 py-4">
-        <div>
-          <div className="mb-1 flex flex-wrap items-center gap-2">
-            <span className="inline-flex items-center gap-1 rounded-full border border-amber-400/30 bg-amber-400/10 px-2.5 py-0.5 text-[11px] font-medium uppercase tracking-wider text-amber-300">
-              <Sparkles className="h-3 w-3" />
-              {roleLabel(role)}
-            </span>
-            {projectName && (
-              <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 text-[11px] text-zinc-400">
-                Proyecto: {projectName}
+      <header className="shrink-0 border-b border-white/10 px-3 py-3 sm:px-5 sm:py-4">
+        <div className="flex items-start justify-between gap-2">
+          <div className="min-w-0 flex-1">
+            <div className="mb-1 flex flex-wrap items-center gap-1.5">
+              <span className="inline-flex items-center gap-1 rounded-full border border-amber-400/30 bg-amber-400/10 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-amber-300 sm:text-[11px]">
+                <Sparkles className="h-3 w-3" />
+                {roleLabel(role)}
               </span>
-            )}
-            <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 text-[11px] text-zinc-500">
-              Memoria + historial activos
-            </span>
+              {projectName && (
+                <span className="max-w-[10rem] truncate rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] text-zinc-400 sm:max-w-none sm:text-[11px]">
+                  {projectName}
+                </span>
+              )}
+            </div>
+            <h1 className="truncate text-lg font-semibold tracking-tight text-white sm:text-xl">
+              {title}
+            </h1>
+            <p className="mt-0.5 line-clamp-2 text-xs text-zinc-500 sm:line-clamp-none sm:text-sm sm:text-zinc-400">
+              {subtitle}
+            </p>
           </div>
-          <h1 className="text-xl font-semibold tracking-tight text-white">
-            {title}
-          </h1>
-          <p className="mt-1 max-w-2xl text-sm text-zinc-400">{subtitle}</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={saveLastAsDeliverable}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs font-medium text-zinc-200 transition hover:bg-white/10"
-          >
-            <BookmarkPlus className="h-3.5 w-3.5" />
-            {savedFlash ? "Guardado" : "Guardar deliverable"}
-          </button>
-          <button
-            type="button"
-            onClick={() => void clearChat()}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs font-medium text-zinc-300 transition hover:bg-white/10"
-          >
-            <Trash2 className="h-3.5 w-3.5" />
-            Limpiar
-          </button>
+          <div className="flex shrink-0 items-center gap-1.5">
+            <button
+              type="button"
+              onClick={saveLastAsDeliverable}
+              title="Guardar deliverable"
+              className="inline-flex h-10 items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-2.5 text-xs font-medium text-zinc-200 transition active:scale-95 hover:bg-white/10 sm:px-3"
+            >
+              <BookmarkPlus className="h-4 w-4" />
+              <span className="hidden sm:inline">
+                {savedFlash ? "Guardado" : "Guardar"}
+              </span>
+            </button>
+            <button
+              type="button"
+              onClick={() => void clearChat()}
+              title="Limpiar chat"
+              className="inline-flex h-10 items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-2.5 text-xs font-medium text-zinc-300 transition active:scale-95 hover:bg-white/10 sm:px-3"
+            >
+              <Trash2 className="h-4 w-4" />
+              <span className="hidden sm:inline">Limpiar</span>
+            </button>
+          </div>
         </div>
       </header>
 
-      <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5">
+      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 py-4 sm:px-5 sm:py-5">
         {!hydrated ? (
-          <div className="flex items-center justify-center gap-2 py-20 text-sm text-zinc-500">
+          <div className="flex items-center justify-center gap-2 py-16 text-sm text-zinc-500">
             <Loader2 className="h-4 w-4 animate-spin" />
-            Cargando tu historial y memoria…
+            Cargando historial…
           </div>
         ) : messages.length === 0 ? (
           <div className="mx-auto max-w-3xl">
-            <div className="mb-6 rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.06] to-transparent p-6">
+            <div className="mb-4 rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.06] to-transparent p-4 sm:mb-6 sm:p-6">
               <p className="text-sm leading-relaxed text-zinc-300">
-                Este hilo es privado y se guarda en tu cuenta. APEX recuerda tus
-                proyectos y hechos clave entre sesiones.
+                Hilo privado con memoria. APEX recuerda proyectos y hechos entre
+                sesiones.
               </p>
             </div>
             {starters.length > 0 && (
               <div className="grid gap-2">
-                <p className="mb-1 text-xs font-medium uppercase tracking-wider text-zinc-500">
+                <p className="mb-0.5 text-[11px] font-medium uppercase tracking-wider text-zinc-500">
                   Empieza con
                 </p>
                 {starters.map((s) => (
@@ -281,7 +284,7 @@ export function ChatPanel({ moduleId, role, title, subtitle, starters }: Props) 
                     key={s}
                     type="button"
                     onClick={() => runStarter(s)}
-                    className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-left text-sm text-zinc-300 transition hover:border-amber-400/40 hover:bg-amber-400/5 hover:text-white"
+                    className="rounded-2xl border border-white/10 bg-white/[0.03] px-3.5 py-3.5 text-left text-[13px] leading-snug text-zinc-300 transition active:scale-[0.99] hover:border-amber-400/40 hover:bg-amber-400/5 hover:text-white sm:px-4 sm:text-sm"
                   >
                     {s}
                   </button>
@@ -290,13 +293,13 @@ export function ChatPanel({ moduleId, role, title, subtitle, starters }: Props) 
             )}
           </div>
         ) : (
-          <div className="mx-auto max-w-3xl space-y-5">
+          <div className="mx-auto max-w-3xl space-y-4 sm:space-y-5">
             {messages.map((m) => {
               const text = textFromMessage(m);
               if (m.role === "user") {
                 return (
                   <div key={m.id} className="flex justify-end">
-                    <div className="max-w-[90%] rounded-2xl rounded-br-md bg-amber-500/15 px-4 py-3 text-sm text-amber-50 ring-1 ring-amber-400/20">
+                    <div className="max-w-[92%] rounded-2xl rounded-br-md bg-amber-500/15 px-3.5 py-2.5 text-[13px] leading-relaxed text-amber-50 ring-1 ring-amber-400/20 sm:max-w-[90%] sm:px-4 sm:py-3 sm:text-sm">
                       {text}
                     </div>
                   </div>
@@ -305,30 +308,32 @@ export function ChatPanel({ moduleId, role, title, subtitle, starters }: Props) 
               return (
                 <div
                   key={m.id}
-                  className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-4"
+                  className="rounded-2xl border border-white/10 bg-white/[0.03] px-3.5 py-3.5 sm:px-4 sm:py-4"
                 >
-                  <div className="mb-2 text-[11px] font-medium uppercase tracking-wider text-amber-400/80">
+                  <div className="mb-2 text-[10px] font-medium uppercase tracking-wider text-amber-400/80 sm:text-[11px]">
                     APEX · {roleLabel(role)}
                   </div>
-                  <SimpleMarkdown content={text || "…"} />
+                  <div className="text-[13px] sm:text-[15px]">
+                    <SimpleMarkdown content={text || "…"} />
+                  </div>
                 </div>
               );
             })}
             {busy && (
               <div className="flex items-center gap-2 text-sm text-zinc-500">
                 <Loader2 className="h-4 w-4 animate-spin" />
-                El consejo está trabajando…
+                Trabajando…
               </div>
             )}
-            <div ref={bottomRef} />
+            <div ref={bottomRef} className="h-2" />
           </div>
         )}
       </div>
 
       {error && (
-        <div className="border-t border-red-500/30 bg-red-500/10 px-5 py-3 text-sm text-red-200">
-          <p className="font-medium">No se pudo completar la respuesta</p>
-          <p className="mt-1 text-red-200/90">
+        <div className="shrink-0 border-t border-red-500/30 bg-red-500/10 px-3 py-2.5 text-sm text-red-200 sm:px-5 sm:py-3">
+          <p className="font-medium">No se pudo completar</p>
+          <p className="mt-0.5 text-xs text-red-200/90 sm:text-sm">
             {error.message || "Error al contactar el modelo."}
           </p>
         </div>
@@ -336,7 +341,7 @@ export function ChatPanel({ moduleId, role, title, subtitle, starters }: Props) 
 
       <form
         onSubmit={onSubmit}
-        className="border-t border-white/10 bg-[#0b0b0f]/95 px-5 py-4 backdrop-blur"
+        className="shrink-0 border-t border-white/10 bg-[#0b0b0f]/98 px-3 py-3 backdrop-blur sm:px-5 sm:py-4"
       >
         <div className="mx-auto flex max-w-3xl items-end gap-2">
           <textarea
@@ -348,27 +353,29 @@ export function ChatPanel({ moduleId, role, title, subtitle, starters }: Props) 
                 void onSubmit(e);
               }
             }}
-            rows={2}
-            placeholder="Pide estrategia, ads, arquitectura o código… APEX lo recuerda."
-            className="min-h-[52px] flex-1 resize-none rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none transition placeholder:text-zinc-600 focus:border-amber-400/40 focus:ring-2 focus:ring-amber-400/20"
+            rows={1}
+            placeholder="Escribe tu mensaje…"
+            className="max-h-32 min-h-[48px] flex-1 resize-none rounded-2xl border border-white/10 bg-white/5 px-3.5 py-3 text-base text-white outline-none transition placeholder:text-zinc-600 focus:border-amber-400/40 focus:ring-2 focus:ring-amber-400/20 sm:min-h-[52px] sm:px-4 sm:text-sm"
           />
           {busy ? (
             <button
               type="button"
               onClick={() => stop()}
-              className="inline-flex h-[52px] items-center gap-2 rounded-xl border border-white/15 bg-white/10 px-4 text-sm font-medium text-white hover:bg-white/15"
+              className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-white/15 bg-white/10 text-white active:scale-95 sm:h-[52px] sm:w-auto sm:gap-2 sm:px-4 sm:text-sm sm:font-medium"
+              aria-label="Detener"
             >
               <Square className="h-4 w-4" />
-              Stop
+              <span className="hidden sm:inline">Stop</span>
             </button>
           ) : (
             <button
               type="submit"
               disabled={!input.trim() || !hydrated}
-              className="inline-flex h-[52px] items-center gap-2 rounded-xl bg-amber-400 px-4 text-sm font-semibold text-black transition hover:bg-amber-300 disabled:cursor-not-allowed disabled:opacity-40"
+              className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-amber-400 text-black transition active:scale-95 hover:bg-amber-300 disabled:cursor-not-allowed disabled:opacity-40 sm:h-[52px] sm:w-auto sm:gap-2 sm:px-4 sm:text-sm sm:font-semibold"
+              aria-label="Enviar"
             >
               <Send className="h-4 w-4" />
-              Enviar
+              <span className="hidden sm:inline">Enviar</span>
             </button>
           )}
         </div>
@@ -386,6 +393,6 @@ function roleLabel(role: RoleMode) {
     case "lead":
       return "Lead Dev";
     default:
-      return "Consejo Senior";
+      return "Consejo";
   }
 }

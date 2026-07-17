@@ -24,6 +24,22 @@ export const metadata: Metadata = {
     "growth",
     "APEX",
   ],
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "APEX",
+  },
+  formatDetection: {
+    telephone: false,
+  },
+};
+
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  viewportFit: "cover" as const,
+  themeColor: "#070709",
 };
 
 export default function RootLayout({

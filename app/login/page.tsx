@@ -103,9 +103,9 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <div className="relative flex min-h-screen items-center justify-center px-4">
+    <div className="relative flex min-h-[100dvh] items-center justify-center px-4 py-[max(1rem,env(safe-area-inset-top))] pb-[max(1.5rem,env(safe-area-inset-bottom))]">
       <div className="pointer-events-none absolute inset-0 apex-glow" />
-      <div className="relative w-full max-w-md rounded-3xl border border-white/10 bg-[#0c0c10]/90 p-8 shadow-2xl backdrop-blur">
+      <div className="relative w-full max-w-md rounded-3xl border border-white/10 bg-[#0c0c10]/95 p-5 shadow-2xl backdrop-blur sm:p-8">
         <Link href="/" className="inline-flex items-center gap-2">
           <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-amber-300 to-orange-500 text-black">
             <Zap className="h-5 w-5 fill-current" />
