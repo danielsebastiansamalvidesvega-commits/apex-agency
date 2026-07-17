@@ -4,15 +4,19 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, Suspense, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { AuthDivider, GoogleAuthButton } from "@/components/google-auth-button";
 import { Loader2, Zap } from "lucide-react";
 
 function LoginForm() {
   const router = useRouter();
   const search = useSearchParams();
   const next = search.get("next") || "/app";
+  const urlError = search.get("error");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(
+    urlError ? decodeURIComponent(urlError) : null,
+  );
   const [loading, setLoading] = useState(false);
 
   async function onSubmit(e: FormEvent) {
@@ -31,7 +35,7 @@ function LoginForm() {
           setError("Email o contraseña incorrectos.");
         } else if (msg.includes("confirm") || msg.includes("email not confirmed")) {
           setError(
-            "Email no confirmado. En Supabase desactiva Authentication → Providers → Email → Confirm email para entrar al instante.",
+            "Email no confirmado. Revisa tu correo o usa Continuar con Google.",
           );
         } else {
           setError(err.message);
@@ -48,47 +52,52 @@ function LoginForm() {
   }
 
   return (
-    <form onSubmit={onSubmit} className="mt-8 space-y-4">
-      <label className="block text-sm text-zinc-400">
-        Email
-        <input
-          type="email"
-          required
-          autoComplete="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="mt-1.5 w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none focus:border-amber-400/40 focus:ring-2 focus:ring-amber-400/20"
-          placeholder="tu@empresa.com"
-        />
-      </label>
-      <label className="block text-sm text-zinc-400">
-        Contraseña
-        <input
-          type="password"
-          required
-          autoComplete="current-password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="mt-1.5 w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none focus:border-amber-400/40 focus:ring-2 focus:ring-amber-400/20"
-          placeholder="••••••••"
-        />
-      </label>
+    <div className="mt-8">
+      <GoogleAuthButton next={next} label="Continuar con Google" />
+      <AuthDivider />
 
-      {error && (
-        <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-200">
-          {error}
-        </div>
-      )}
+      <form onSubmit={onSubmit} className="space-y-4">
+        <label className="block text-sm text-zinc-400">
+          Email
+          <input
+            type="email"
+            required
+            autoComplete="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="mt-1.5 w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none focus:border-amber-400/40 focus:ring-2 focus:ring-amber-400/20"
+            placeholder="tu@empresa.com"
+          />
+        </label>
+        <label className="block text-sm text-zinc-400">
+          Contraseña
+          <input
+            type="password"
+            required
+            autoComplete="current-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="mt-1.5 w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none focus:border-amber-400/40 focus:ring-2 focus:ring-amber-400/20"
+            placeholder="••••••••"
+          />
+        </label>
 
-      <button
-        type="submit"
-        disabled={loading}
-        className="flex w-full items-center justify-center gap-2 rounded-xl bg-amber-400 py-3 text-sm font-semibold text-black transition hover:bg-amber-300 disabled:opacity-50"
-      >
-        {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-        Iniciar sesión
-      </button>
-    </form>
+        {error && (
+          <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-200">
+            {error}
+          </div>
+        )}
+
+        <button
+          type="submit"
+          disabled={loading}
+          className="flex w-full items-center justify-center gap-2 rounded-xl bg-amber-400 py-3 text-sm font-semibold text-black transition hover:bg-amber-300 disabled:opacity-50"
+        >
+          {loading && <Loader2 className="h-4 w-4 animate-spin" />}
+          Iniciar sesión
+        </button>
+      </form>
+    </div>
   );
 }
 
@@ -115,13 +124,20 @@ export default function LoginPage() {
           solo tuyos.
         </p>
 
-        <Suspense fallback={<div className="mt-8 h-40 animate-pulse rounded-xl bg-white/5" />}>
+        <Suspense
+          fallback={
+            <div className="mt-8 h-40 animate-pulse rounded-xl bg-white/5" />
+          }
+        >
           <LoginForm />
         </Suspense>
 
         <p className="mt-6 text-center text-sm text-zinc-500">
           ¿No tienes cuenta?{" "}
-          <Link href="/signup" className="font-medium text-amber-400 hover:text-amber-300">
+          <Link
+            href="/signup"
+            className="font-medium text-amber-400 hover:text-amber-300"
+          >
             Crear cuenta
           </Link>
         </p>

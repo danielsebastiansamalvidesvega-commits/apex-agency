@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { AuthDivider, GoogleAuthButton } from "@/components/google-auth-button";
 import { CheckCircle2, Loader2, Mail, Zap } from "lucide-react";
 
 type Phase = "form" | "check-email";
@@ -158,11 +159,15 @@ export default function SignupPage() {
           Crea tu cuenta
         </h1>
         <p className="mt-2 text-sm text-zinc-400">
-          Te enviaremos un email para verificar tu identidad y proteger tu
-          workspace.
+          Entra con Google en un clic, o regístrate con email.
         </p>
 
-        <form onSubmit={onSubmit} className="mt-8 space-y-4">
+        <div className="mt-8">
+          <GoogleAuthButton next="/app" label="Continuar con Google" />
+          <AuthDivider text="o regístrate con email" />
+        </div>
+
+        <form onSubmit={onSubmit} className="space-y-4">
           <label className="block text-sm text-zinc-400">
             Nombre
             <input
