@@ -127,9 +127,13 @@ export async function POST(req: Request) {
     // Full thread stays in the UI/DB; model only sees a recent window
     const modelMessages = trimMessagesForModel(messages, MAX_HISTORY_MESSAGES);
 
+    // Cheapest text model by default (override with XAI_MODEL on Vercel)
+    // Pricing (approx per 1M tokens): build-0.1 $1/$2 · 4.3 $1.25/$2.50 · 4.5 $2/$6
+    const modelId =
+      process.env.XAI_MODEL?.trim() || "grok-build-0.1";
+
     const result = streamText({
-      // Chat endpoint is cheaper/faster for multi-turn than full reasoning responses
-      model: xai("grok-4.5"),
+      model: xai(modelId),
       system,
       messages: await convertToModelMessages(modelMessages),
       maxOutputTokens: MAX_OUTPUT_TOKENS,
