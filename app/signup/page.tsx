@@ -4,7 +4,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { Loader2, Zap } from "lucide-react";
+import { CheckCircle2, Loader2, Mail, Zap } from "lucide-react";
+
+type Phase = "form" | "check-email";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -13,6 +15,8 @@ export default function SignupPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [phase, setPhase] = useState<Phase>("form");
+  const [registeredEmail, setRegisteredEmail] = useState("");
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
@@ -24,14 +28,15 @@ export default function SignupPage() {
 
     try {
       const supabase = createClient();
+      // En producción esto es https://apex-agency-nine.vercel.app (no localhost)
+      const origin = window.location.origin;
 
       const { data, error: signUpError } = await supabase.auth.signUp({
         email: cleanEmail,
         password,
         options: {
           data: { full_name: name },
-          // Solo se usa si en Supabase dejas confirmación de email activa
-          emailRedirectTo: `${window.location.origin}/auth/callback?next=/app`,
+          emailRedirectTo: `${origin}/auth/callback?next=/app`,
         },
       });
 
@@ -40,7 +45,9 @@ export default function SignupPage() {
         if (msg.includes("already") || msg.includes("registered")) {
           setError("Este email ya tiene una cuenta. Inicia sesión.");
         } else if (msg.includes("password")) {
-          setError("La contraseña no cumple los requisitos (mínimo 8 caracteres).");
+          setError(
+            "La contraseña no cumple los requisitos (mínimo 8 caracteres).",
+          );
         } else {
           setError(signUpError.message);
         }
@@ -48,61 +55,79 @@ export default function SignupPage() {
         return;
       }
 
-      // Flujo profesional: entrar al workspace al crear la cuenta
-      let session = data.session;
-
-      if (!session) {
-        const { data: signInData, error: signInError } =
-          await supabase.auth.signInWithPassword({
-            email: cleanEmail,
-            password,
-          });
-
-        if (signInError) {
-          const msg = signInError.message.toLowerCase();
-          if (msg.includes("confirm") || msg.includes("email not confirmed")) {
-            setError(
-              "Tu proyecto Supabase exige confirmar el email. Desactívalo en Authentication → Providers → Email → Confirm email, o confirma el correo (el enlace debe apuntar a apex-agency-nine.vercel.app, no a localhost).",
-            );
-          } else {
-            setError(
-              "Cuenta creada, pero no se pudo iniciar sesión automáticamente. Usa «Iniciar sesión».",
-            );
-          }
-          setLoading(false);
-          return;
-        }
-        session = signInData.session;
-      }
-
-      if (!session) {
-        setError(
-          "No se pudo abrir la sesión. Revisa en Supabase que «Confirm email» esté desactivado.",
-        );
-        setLoading(false);
-        return;
-      }
-
-      // Asegurar perfil con nombre
-      if (name) {
-        await supabase
-          .from("profiles")
-          .upsert(
+      // Confirm email OFF en Supabase → sesión inmediata
+      if (data.session) {
+        if (name) {
+          await supabase.from("profiles").upsert(
             {
-              id: session.user.id,
+              id: data.session.user.id,
               email: cleanEmail,
               full_name: name,
             },
             { onConflict: "id" },
           );
+        }
+        router.replace("/app");
+        router.refresh();
+        return;
       }
 
-      router.replace("/app");
-      router.refresh();
+      // Confirm email ON → flujo profesional: verifica correo
+      // (no intentar login: fallará hasta confirmar)
+      setRegisteredEmail(cleanEmail);
+      setPhase("check-email");
+      setLoading(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error al crear la cuenta");
       setLoading(false);
     }
+  }
+
+  if (phase === "check-email") {
+    return (
+      <div className="relative flex min-h-screen items-center justify-center px-4">
+        <div className="pointer-events-none absolute inset-0 apex-glow" />
+        <div className="relative w-full max-w-md rounded-3xl border border-white/10 bg-[#0c0c10]/90 p-8 shadow-2xl backdrop-blur">
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-400/15 text-amber-300">
+            <Mail className="h-6 w-6" />
+          </div>
+          <h1 className="mt-5 text-2xl font-semibold tracking-tight text-white">
+            Revisa tu correo
+          </h1>
+          <p className="mt-3 text-sm leading-relaxed text-zinc-400">
+            Enviamos un enlace de verificación a{" "}
+            <span className="font-medium text-zinc-200">{registeredEmail}</span>.
+            Ábrelo para activar tu cuenta y entrar a APEX.
+          </p>
+          <ul className="mt-5 space-y-2 text-sm text-zinc-500">
+            <li className="flex gap-2">
+              <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-amber-400/80" />
+              Revisa también spam o promociones.
+            </li>
+            <li className="flex gap-2">
+              <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-amber-400/80" />
+              El enlace te llevará de vuelta a APEX (no a localhost).
+            </li>
+          </ul>
+          <Link
+            href="/login"
+            className="mt-8 flex w-full items-center justify-center rounded-xl bg-amber-400 py-3 text-sm font-semibold text-black transition hover:bg-amber-300"
+          >
+            Ir a iniciar sesión
+          </Link>
+          <button
+            type="button"
+            onClick={() => {
+              setPhase("form");
+              setError(null);
+            }}
+            className="mt-3 w-full text-center text-sm text-zinc-500 hover:text-zinc-300"
+          >
+            Usar otro email
+          </button>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -123,7 +148,8 @@ export default function SignupPage() {
           Crea tu cuenta
         </h1>
         <p className="mt-2 text-sm text-zinc-400">
-          En segundos entras a tu workspace privado. Sin pasos extra.
+          Te enviaremos un email para verificar tu identidad y proteger tu
+          workspace.
         </p>
 
         <form onSubmit={onSubmit} className="mt-8 space-y-4">
@@ -175,7 +201,7 @@ export default function SignupPage() {
             className="flex w-full items-center justify-center gap-2 rounded-xl bg-amber-400 py-3 text-sm font-semibold text-black transition hover:bg-amber-300 disabled:opacity-50"
           >
             {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-            {loading ? "Creando tu workspace…" : "Crear cuenta y entrar"}
+            {loading ? "Creando cuenta…" : "Crear cuenta"}
           </button>
         </form>
 
