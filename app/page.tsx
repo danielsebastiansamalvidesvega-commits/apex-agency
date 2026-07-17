@@ -87,7 +87,7 @@ export default function LandingPage() {
         <section className="mx-auto max-w-6xl px-6 pb-16 pt-10 sm:pt-16">
           <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-amber-400/25 bg-amber-400/10 px-3 py-1 text-xs font-medium text-amber-200">
             <Sparkles className="h-3.5 w-3.5" />
-            Superior a COPA IA · Coopa · Kopa — agencia completa + equipo tech
+            Agencia digital + equipo técnico senior en un solo workspace
           </div>
           <h1 className="max-w-4xl text-4xl font-semibold tracking-tight text-white sm:text-6xl sm:leading-[1.05]">
             Tu{" "}
@@ -165,7 +165,7 @@ export default function LandingPage() {
 
         <section className="mx-auto max-w-6xl px-6 py-16">
           <h2 className="text-2xl font-semibold tracking-tight text-white sm:text-3xl">
-            Por qué APEX gana
+            Una operación integral
           </h2>
           <div className="mt-8 overflow-hidden rounded-2xl border border-white/10">
             <div className="grid grid-cols-2 bg-white/5 text-xs font-semibold uppercase tracking-wider text-zinc-500">

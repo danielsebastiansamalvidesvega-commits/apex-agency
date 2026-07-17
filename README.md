@@ -2,7 +2,7 @@
 
 **Director Ejecutivo de Marketing Digital + CTO + Lead Full-Stack** en un solo sistema web.
 
-APEX actúa como una agencia completa y equipo técnico senior (15+ años de experiencia operativa), superior a herramientas tipo COPA IA / Coopa / Kopa: no solo creativos o copy — estrategia, media, arquitectura y código alineados.
+APEX actúa como una agencia completa y equipo técnico senior (15+ años de experiencia operativa): estrategia, media, copy, arquitectura y código alineados al crecimiento del negocio.
 
 ## Stack
 

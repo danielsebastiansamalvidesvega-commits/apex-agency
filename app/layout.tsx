@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "APEX — Agency OS | CMO + CTO + Lead Full-Stack",
   description:
-    "Tu agencia completa y equipo técnico senior en un solo sistema. Estrategia, ads, copy, arquitectura y código. Superior a COPA IA, Coopa o Kopa.",
+    "Agencia digital y equipo técnico senior en un solo sistema. Estrategia, ads, copy, arquitectura y código alineados al crecimiento.",
   keywords: [
     "marketing digital",
     "agencia IA",
