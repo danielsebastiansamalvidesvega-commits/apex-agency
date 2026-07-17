@@ -12,46 +12,95 @@ export default function SignupPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [info, setInfo] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
-    setInfo(null);
     setLoading(true);
+
+    const cleanEmail = email.trim().toLowerCase();
+    const name = fullName.trim();
 
     try {
       const supabase = createClient();
-      const origin = window.location.origin;
-      const { data, error: err } = await supabase.auth.signUp({
-        email: email.trim(),
+
+      const { data, error: signUpError } = await supabase.auth.signUp({
+        email: cleanEmail,
         password,
         options: {
-          data: { full_name: fullName.trim() },
-          emailRedirectTo: `${origin}/auth/callback?next=/app`,
+          data: { full_name: name },
+          // Solo se usa si en Supabase dejas confirmación de email activa
+          emailRedirectTo: `${window.location.origin}/auth/callback?next=/app`,
         },
       });
 
-      if (err) {
-        setError(err.message);
+      if (signUpError) {
+        const msg = signUpError.message.toLowerCase();
+        if (msg.includes("already") || msg.includes("registered")) {
+          setError("Este email ya tiene una cuenta. Inicia sesión.");
+        } else if (msg.includes("password")) {
+          setError("La contraseña no cumple los requisitos (mínimo 8 caracteres).");
+        } else {
+          setError(signUpError.message);
+        }
         setLoading(false);
         return;
       }
 
-      // If email confirmation is disabled, session exists
-      if (data.session) {
-        router.push("/app");
-        router.refresh();
+      // Flujo profesional: entrar al workspace al crear la cuenta
+      let session = data.session;
+
+      if (!session) {
+        const { data: signInData, error: signInError } =
+          await supabase.auth.signInWithPassword({
+            email: cleanEmail,
+            password,
+          });
+
+        if (signInError) {
+          const msg = signInError.message.toLowerCase();
+          if (msg.includes("confirm") || msg.includes("email not confirmed")) {
+            setError(
+              "Tu proyecto Supabase exige confirmar el email. Desactívalo en Authentication → Providers → Email → Confirm email, o confirma el correo (el enlace debe apuntar a apex-agency-nine.vercel.app, no a localhost).",
+            );
+          } else {
+            setError(
+              "Cuenta creada, pero no se pudo iniciar sesión automáticamente. Usa «Iniciar sesión».",
+            );
+          }
+          setLoading(false);
+          return;
+        }
+        session = signInData.session;
+      }
+
+      if (!session) {
+        setError(
+          "No se pudo abrir la sesión. Revisa en Supabase que «Confirm email» esté desactivado.",
+        );
+        setLoading(false);
         return;
       }
 
-      setInfo(
-        "Cuenta creada. Revisa tu email para confirmar (si está activado en Supabase) o inicia sesión.",
-      );
-      setLoading(false);
+      // Asegurar perfil con nombre
+      if (name) {
+        await supabase
+          .from("profiles")
+          .upsert(
+            {
+              id: session.user.id,
+              email: cleanEmail,
+              full_name: name,
+            },
+            { onConflict: "id" },
+          );
+      }
+
+      router.replace("/app");
+      router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error al registrarse");
+      setError(err instanceof Error ? err.message : "Error al crear la cuenta");
       setLoading(false);
     }
   }
@@ -74,8 +123,7 @@ export default function SignupPage() {
           Crea tu cuenta
         </h1>
         <p className="mt-2 text-sm text-zinc-400">
-          Workspace personal con memoria de proyectos, historial y deliverables
-          privados.
+          En segundos entras a tu workspace privado. Sin pasos extra.
         </p>
 
         <form onSubmit={onSubmit} className="mt-8 space-y-4">
@@ -120,11 +168,6 @@ export default function SignupPage() {
               {error}
             </div>
           )}
-          {info && (
-            <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-200">
-              {info}
-            </div>
-          )}
 
           <button
             type="submit"
@@ -132,13 +175,16 @@ export default function SignupPage() {
             className="flex w-full items-center justify-center gap-2 rounded-xl bg-amber-400 py-3 text-sm font-semibold text-black transition hover:bg-amber-300 disabled:opacity-50"
           >
             {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-            Crear cuenta
+            {loading ? "Creando tu workspace…" : "Crear cuenta y entrar"}
           </button>
         </form>
 
         <p className="mt-6 text-center text-sm text-zinc-500">
           ¿Ya tienes cuenta?{" "}
-          <Link href="/login" className="font-medium text-amber-400 hover:text-amber-300">
+          <Link
+            href="/login"
+            className="font-medium text-amber-400 hover:text-amber-300"
+          >
             Iniciar sesión
           </Link>
         </p>

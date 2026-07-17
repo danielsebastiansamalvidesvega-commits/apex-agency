@@ -26,11 +26,16 @@ function LoginForm() {
         password,
       });
       if (err) {
-        setError(
-          err.message === "Invalid login credentials"
-            ? "Email o contraseña incorrectos."
-            : err.message,
-        );
+        const msg = err.message.toLowerCase();
+        if (err.message === "Invalid login credentials") {
+          setError("Email o contraseña incorrectos.");
+        } else if (msg.includes("confirm") || msg.includes("email not confirmed")) {
+          setError(
+            "Email no confirmado. En Supabase desactiva Authentication → Providers → Email → Confirm email para entrar al instante.",
+          );
+        } else {
+          setError(err.message);
+        }
         setLoading(false);
         return;
       }
