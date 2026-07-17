@@ -151,7 +151,7 @@ export default function SignupPage() {
           </span>
           <div>
             <div className="text-sm font-bold text-white">APEX</div>
-            <div className="text-[11px] text-zinc-500">Tu equipo digital</div>
+            <div className="text-[11px] text-zinc-500">Agency OS</div>
           </div>
         </Link>
 
@@ -159,12 +159,12 @@ export default function SignupPage() {
           Crea tu cuenta
         </h1>
         <p className="mt-2 text-sm text-zinc-400">
-          Rápido y gratis. Puedes entrar con Google o con tu email.
+          Entra con Google en un clic, o regístrate con email.
         </p>
 
         <div className="mt-8">
           <GoogleAuthButton next="/app" label="Continuar con Google" />
-          <AuthDivider text="o con tu email" />
+          <AuthDivider text="o regístrate con email" />
         </div>
 
         <form onSubmit={onSubmit} className="space-y-4">

@@ -133,11 +133,11 @@ export default function ProyectosPage() {
     <div className="h-full overflow-y-auto overscroll-contain">
       <header className="border-b border-white/10 px-4 py-4 sm:px-6 sm:py-5">
         <h1 className="text-lg font-semibold text-white sm:text-xl">
-          Mis negocios
+          Proyectos
         </h1>
         <p className="mt-1 max-w-2xl text-sm text-zinc-400">
-          Guarda la info de tu marca o cliente. APEX la usa para no pedirte lo
-          mismo otra vez.
+          Workspaces privados por marca o cliente. El proyecto activo se
+          inyecta en el chat y alimenta la memoria de APEX.
         </p>
       </header>
 
@@ -159,7 +159,7 @@ export default function ProyectosPage() {
               <div className="mb-4 flex items-center gap-2">
                 <FolderPlus className="h-4 w-4 text-amber-400" />
                 <h2 className="text-sm font-semibold text-white">
-                  {editingId ? "Editar negocio" : "Agregar negocio"}
+                  {editingId ? "Editar proyecto" : "Nuevo proyecto"}
                 </h2>
               </div>
               <div className="grid gap-3 sm:grid-cols-2">
@@ -204,7 +204,7 @@ export default function ProyectosPage() {
                   type="submit"
                   className="rounded-lg bg-amber-400 px-4 py-2 text-sm font-semibold text-black hover:bg-amber-300"
                 >
-                  {editingId ? "Guardar cambios" : "Guardar y usar"}
+                  {editingId ? "Guardar cambios" : "Crear y activar"}
                 </button>
                 {editingId && (
                   <button
@@ -290,7 +290,7 @@ export default function ProyectosPage() {
 
           <section>
             <h2 className="mb-3 text-sm font-semibold text-white">
-              Documentos guardados
+              Deliverables guardados
             </h2>
             <div className="space-y-2">
               {projectDels.length === 0 && (

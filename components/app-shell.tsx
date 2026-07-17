@@ -89,7 +89,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <div className="min-w-0">
               <div className="truncate text-sm font-bold text-white">APEX</div>
               <div className="truncate text-[10px] text-zinc-500">
-                Tu equipo digital
+                Agency OS
               </div>
             </div>
           </Link>

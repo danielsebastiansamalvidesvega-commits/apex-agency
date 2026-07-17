@@ -1,101 +1,88 @@
 import Link from "next/link";
 import { MODULES } from "@/lib/modules";
 import { ModuleIcon } from "@/components/icons";
-import { ArrowRight, MessageCircle, Sparkles } from "lucide-react";
-
-const PRIMARY = ["consejo", "estrategia", "copy", "ads", "proyectos"] as const;
-const MORE = ["tech", "code", "memoria"] as const;
+import { ArrowRight, Rocket, Shield, TrendingUp } from "lucide-react";
 
 export default function DashboardPage() {
-  const primary = MODULES.filter((m) =>
-    (PRIMARY as readonly string[]).includes(m.id),
-  );
-  const more = MODULES.filter((m) => (MORE as readonly string[]).includes(m.id));
+  const modules = MODULES.filter((m) => m.id !== "dashboard");
 
   return (
     <div className="h-full overflow-y-auto overscroll-contain">
       <div className="border-b border-white/10 px-4 py-5 sm:px-6 sm:py-6">
-        <p className="text-xs font-medium text-amber-400/90">Hola 👋</p>
+        <p className="text-xs font-medium uppercase tracking-wider text-amber-400/90">
+          Command Center
+        </p>
         <h1 className="mt-1 text-xl font-semibold tracking-tight text-white sm:text-2xl">
-          ¿En qué te ayudo hoy?
+          Bienvenido a APEX
         </h1>
-        <p className="mt-2 max-w-lg text-sm text-zinc-400">
-          Elige una opción. No necesitas saber de marketing ni de programación.
+        <p className="mt-2 max-w-2xl text-sm text-zinc-400">
+          Operas con un equipo senior unificado: marketing digital, arquitectura
+          y desarrollo full-stack. Elige un módulo o abre el Consejo.
         </p>
       </div>
 
-      <div className="p-4 sm:p-6">
-        <Link
-          href="/app/consejo"
-          className="flex flex-col gap-3 rounded-3xl border border-amber-400/30 bg-gradient-to-br from-amber-400/20 to-orange-500/5 p-5 transition active:scale-[0.99] sm:flex-row sm:items-center sm:justify-between"
-        >
-          <div className="flex gap-3">
-            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-amber-400 text-black">
-              <MessageCircle className="h-6 w-6" />
+      <div className="grid gap-3 p-4 sm:gap-4 sm:p-6 lg:grid-cols-3">
+        <div className="rounded-2xl border border-amber-400/25 bg-gradient-to-br from-amber-400/15 to-transparent p-5 lg:col-span-2">
+          <div className="flex items-center gap-2 text-amber-300">
+            <Rocket className="h-4 w-4" />
+            <span className="text-xs font-semibold uppercase tracking-wider">
+              Recomendado
             </span>
-            <div>
-              <p className="text-xs font-medium uppercase tracking-wider text-amber-300">
-                Lo más fácil
-              </p>
-              <h2 className="mt-0.5 text-lg font-semibold text-white">
-                Hablar con APEX
-              </h2>
-              <p className="mt-1 text-sm text-zinc-400">
-                Cuéntame tu idea o problema y te guío paso a paso.
-              </p>
-            </div>
           </div>
-          <span className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-amber-400 px-4 py-2.5 text-sm font-semibold text-black sm:shrink-0">
-            Empezar chat
+          <h2 className="mt-2 text-xl font-semibold text-white">
+            Abre el Consejo Senior
+          </h2>
+          <p className="mt-2 max-w-xl text-sm text-zinc-400">
+            Auditoría de negocio, GTM + stack + MVP, o diagnóstico de ROAS +
+            tracking. Una conversación, tres roles alineados.
+          </p>
+          <Link
+            href="/app/consejo"
+            className="mt-4 inline-flex items-center gap-2 rounded-xl bg-amber-400 px-4 py-2.5 text-sm font-semibold text-black hover:bg-amber-300"
+          >
+            Ir al Consejo
             <ArrowRight className="h-4 w-4" />
-          </span>
-        </Link>
-      </div>
+          </Link>
+        </div>
 
-      <div className="px-4 pb-4 sm:px-6">
-        <h3 className="mb-3 flex items-center gap-2 text-sm font-medium text-zinc-300">
-          <Sparkles className="h-4 w-4 text-amber-400" />
-          Qué quieres hacer
-        </h3>
-        <div className="grid gap-2.5 sm:grid-cols-2">
-          {primary.map((m) => (
-            <Link
-              key={m.id}
-              href={m.href}
-              className="flex items-start gap-3 rounded-2xl border border-white/10 bg-white/[0.03] p-4 transition active:scale-[0.99] hover:border-amber-400/30 hover:bg-amber-400/5"
-            >
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/5">
-                <ModuleIcon name={m.icon} className="h-5 w-5 text-amber-400" />
-              </span>
-              <div className="min-w-0">
-                <h4 className="font-semibold text-white">{m.label}</h4>
-                <p className="mt-0.5 text-sm leading-snug text-zinc-500">
-                  {m.description}
-                </p>
-              </div>
-            </Link>
-          ))}
+        <div className="space-y-3">
+          <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+            <TrendingUp className="h-4 w-4 text-emerald-400" />
+            <p className="mt-2 text-sm font-medium text-white">Growth first</p>
+            <p className="mt-1 text-xs text-zinc-500">
+              Cada recomendación conecta CAC, LTV y capacidad de ship.
+            </p>
+          </div>
+          <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+            <Shield className="h-4 w-4 text-sky-400" />
+            <p className="mt-2 text-sm font-medium text-white">Tech soberano</p>
+            <p className="mt-1 text-xs text-zinc-500">
+              Decisiones de arquitectura con trade-offs y time-to-value.
+            </p>
+          </div>
         </div>
       </div>
 
-      <div className="px-4 pb-8 sm:px-6">
-        <h3 className="mb-3 text-sm font-medium text-zinc-500">
-          Más opciones
-        </h3>
-        <div className="grid gap-2 sm:grid-cols-3">
-          {more.map((m) => (
+      <div className="px-4 pb-6 sm:px-6 sm:pb-8">
+        <h3 className="mb-3 text-sm font-medium text-zinc-400">Módulos</h3>
+        <div className="grid gap-2.5 sm:grid-cols-2 sm:gap-3 xl:grid-cols-3">
+          {modules.map((m) => (
             <Link
               key={m.id}
               href={m.href}
-              className="rounded-2xl border border-white/10 bg-white/[0.02] px-4 py-3.5 transition hover:border-white/20"
+              className="group rounded-2xl border border-white/10 bg-white/[0.02] p-4 transition active:scale-[0.99] hover:border-amber-400/35 hover:bg-amber-400/5"
             >
-              <div className="flex items-center gap-2">
-                <ModuleIcon name={m.icon} className="h-4 w-4 text-zinc-400" />
-                <span className="text-sm font-medium text-zinc-200">
-                  {m.label}
-                </span>
+              <ModuleIcon
+                name={m.icon}
+                className="h-5 w-5 text-amber-400/90"
+              />
+              <div className="mt-3 flex items-center justify-between gap-2">
+                <h4 className="font-semibold text-white">{m.label}</h4>
+                <ArrowRight className="h-4 w-4 text-zinc-600 transition group-hover:text-amber-400" />
               </div>
-              <p className="mt-1 text-xs text-zinc-600">{m.description}</p>
+              <p className="mt-1 text-sm leading-relaxed text-zinc-500">
+                {m.description}
+              </p>
             </Link>
           ))}
         </div>
