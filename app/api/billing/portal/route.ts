@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient, getAuthUser } from "@/lib/supabase/server";
 import { getBillingProfile } from "@/lib/billing";
 import { getCustomerPortalUrl, isLemonConfigured } from "@/lib/lemon";
+import { isPayPalConfigured } from "@/lib/paypal";
 
 export async function POST() {
   const user = await getAuthUser();
@@ -9,37 +10,28 @@ export async function POST() {
     return NextResponse.json({ error: "No autenticado" }, { status: 401 });
   }
 
-  if (!isLemonConfigured()) {
-    return NextResponse.json(
-      { error: "Lemon Squeezy no está configurado." },
-      { status: 503 },
-    );
+  // Lemon portal si aplica
+  if (isLemonConfigured()) {
+    const supabase = await createClient();
+    const billing = await getBillingProfile(supabase, user.id);
+    if (billing.stripe_customer_id) {
+      const url = await getCustomerPortalUrl(billing.stripe_customer_id);
+      if (url) return NextResponse.json({ url, provider: "lemon" });
+    }
   }
 
-  const supabase = await createClient();
-  const billing = await getBillingProfile(supabase, user.id);
-
-  // Reutilizamos stripe_customer_id para guardar el customer id de Lemon
-  if (!billing.stripe_customer_id) {
-    return NextResponse.json(
-      {
-        error:
-          "Aún no tienes un cliente de pago. Suscríbete a un plan primero.",
-      },
-      { status: 400 },
-    );
+  // PayPal: portal genérico de suscripciones del usuario
+  if (isPayPalConfigured()) {
+    const mode = (process.env.PAYPAL_MODE || "sandbox").toLowerCase();
+    const url =
+      mode === "live"
+        ? "https://www.paypal.com/myaccount/autopay/"
+        : "https://www.sandbox.paypal.com/myaccount/autopay/";
+    return NextResponse.json({ url, provider: "paypal" });
   }
 
-  const url = await getCustomerPortalUrl(billing.stripe_customer_id);
-  if (!url) {
-    return NextResponse.json(
-      {
-        error:
-          "No se pudo abrir el portal. Revisa tu email de Lemon Squeezy o contacta soporte.",
-      },
-      { status: 404 },
-    );
-  }
-
-  return NextResponse.json({ url, provider: "lemon" });
+  return NextResponse.json(
+    { error: "No hay portal de pagos configurado." },
+    { status: 503 },
+  );
 }

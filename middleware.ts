@@ -17,6 +17,9 @@ export const config = {
     "/api/conversations/:path*",
     "/api/memories/:path*",
     "/api/profile/:path*",
-    "/api/billing/:path*",
+    "/api/billing/checkout",
+    "/api/billing/portal",
+    "/api/billing/status",
+    "/api/billing/paypal/return",
   ],
 };

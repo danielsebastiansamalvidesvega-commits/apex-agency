@@ -6,6 +6,7 @@ import {
   getTodayMessageCount,
 } from "@/lib/billing";
 import { isLemonConfigured } from "@/lib/lemon";
+import { isPayPalConfigured } from "@/lib/paypal";
 import { PLAN_ORDER, PLANS } from "@/lib/plans";
 
 export async function GET() {
@@ -19,6 +20,10 @@ export async function GET() {
   const plan = effectivePlanFromProfile(profile);
   const used = await getTodayMessageCount(supabase, user.id);
 
+  const paypal = isPayPalConfigured();
+  const lemon = isLemonConfigured();
+  const paymentsConfigured = paypal || lemon;
+
   return NextResponse.json({
     plan: plan.id,
     planName: plan.name,
@@ -28,11 +33,10 @@ export async function GET() {
     messagesLimit: plan.messagesPerDay,
     maxProjects: plan.maxProjects,
     modules: plan.modules,
-    /** Lemon Squeezy ready */
-    paymentsConfigured: isLemonConfigured(),
-    stripeConfigured: isLemonConfigured(), // compat con UI anterior
-    provider: "lemon_squeezy",
-    hasCustomer: Boolean(profile.stripe_customer_id),
+    paymentsConfigured,
+    stripeConfigured: paymentsConfigured,
+    provider: paypal ? "paypal" : lemon ? "lemon_squeezy" : "none",
+    hasCustomer: Boolean(profile.stripe_customer_id || profile.stripe_subscription_id),
     plans: PLAN_ORDER.map((id) => PLANS[id]),
   });
 }

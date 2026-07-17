@@ -142,14 +142,20 @@ function PlanesContent() {
         )}
         {!status?.paymentsConfigured && !status?.stripeConfigured && (
           <div className="rounded-xl border border-amber-400/25 bg-amber-400/10 px-4 py-3 text-sm text-amber-100">
-            Los pagos se activan con Lemon Squeezy. Configura las variables en
-            Vercel (API key, store y variants). Mientras tanto puedes ver los
-            planes y seguir en Gratis.
+            Pagos con <strong>PayPal</strong> (recomendado desde Perú). Configura
+            PAYPAL_CLIENT_ID, PAYPAL_CLIENT_SECRET y PAYPAL_PLAN_PRO en Vercel.
+            Guía: supabase/PAYPAL_SETUP.md
           </div>
         )}
         {(status?.paymentsConfigured || status?.stripeConfigured) && (
           <div className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-xs text-zinc-500">
-            Pagos con Lemon Squeezy · cobro internacional en USD
+            Pagos con{" "}
+            {status.provider === "paypal"
+              ? "PayPal"
+              : status.provider === "lemon_squeezy"
+                ? "Lemon Squeezy"
+                : "pasarela configurada"}{" "}
+            · cobro internacional
           </div>
         )}
 
