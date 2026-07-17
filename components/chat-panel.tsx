@@ -244,7 +244,7 @@ export function ChatPanel({ moduleId, role, title, subtitle, starters }: Props) 
             >
               <BookmarkPlus className="h-4 w-4" />
               <span className="hidden sm:inline">
-                {savedFlash ? "Guardado" : "Guardar"}
+                {savedFlash ? "Listo" : "Guardar"}
               </span>
             </button>
             <button
@@ -268,16 +268,16 @@ export function ChatPanel({ moduleId, role, title, subtitle, starters }: Props) 
           </div>
         ) : messages.length === 0 ? (
           <div className="mx-auto max-w-3xl">
-            <div className="mb-4 rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.06] to-transparent p-4 sm:mb-6 sm:p-6">
-              <p className="text-sm leading-relaxed text-zinc-300">
-                Hilo privado con memoria. APEX recuerda proyectos y hechos entre
-                sesiones.
+            <div className="mb-4 rounded-2xl border border-white/10 bg-gradient-to-br from-amber-400/10 to-transparent p-4 sm:mb-6 sm:p-6">
+              <p className="text-sm leading-relaxed text-zinc-200">
+                Escribe con tus palabras. No hay preguntas tontas. APEX te
+                responde claro y guarda lo importante de tu negocio.
               </p>
             </div>
             {starters.length > 0 && (
               <div className="grid gap-2">
-                <p className="mb-0.5 text-[11px] font-medium uppercase tracking-wider text-zinc-500">
-                  Empieza con
+                <p className="mb-0.5 text-xs font-medium text-zinc-500">
+                  Ideas para empezar
                 </p>
                 {starters.map((s) => (
                   <button
@@ -354,7 +354,7 @@ export function ChatPanel({ moduleId, role, title, subtitle, starters }: Props) 
               }
             }}
             rows={1}
-            placeholder="Escribe tu mensaje…"
+            placeholder="Escribe aquí… por ejemplo: ayúdame a vender más"
             className="max-h-32 min-h-[48px] flex-1 resize-none rounded-2xl border border-white/10 bg-white/5 px-3.5 py-3 text-base text-white outline-none transition placeholder:text-zinc-600 focus:border-amber-400/40 focus:ring-2 focus:ring-amber-400/20 sm:min-h-[52px] sm:px-4 sm:text-sm"
           />
           {busy ? (
@@ -387,12 +387,12 @@ export function ChatPanel({ moduleId, role, title, subtitle, starters }: Props) 
 function roleLabel(role: RoleMode) {
   switch (role) {
     case "cmo":
-      return "CMO";
+      return "Marketing";
     case "cto":
-      return "CTO";
+      return "Tecnología";
     case "lead":
-      return "Lead Dev";
+      return "Código";
     default:
-      return "Consejo";
+      return "Asesor";
   }
 }

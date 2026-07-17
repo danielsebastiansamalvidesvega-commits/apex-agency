@@ -55,12 +55,11 @@ export default function MemoriaPage() {
       <header className="border-b border-white/10 px-6 py-5">
         <div className="flex items-center gap-2">
           <Brain className="h-5 w-5 text-amber-400" />
-          <h1 className="text-xl font-semibold text-white">Memoria</h1>
+          <h1 className="text-xl font-semibold text-white">Lo que recuerdo</h1>
         </div>
         <p className="mt-2 max-w-2xl text-sm text-zinc-400">
-          Hechos que APEX recuerda entre sesiones — solo visibles para tu
-          cuenta. Se alimentan desde proyectos, deliverables, chat (&quot;recuerda
-          que…&quot;) o aquí manualmente.
+          Notas importantes de tu negocio. APEX las usa en las conversaciones
+          para no pedirte lo mismo otra vez.
         </p>
       </header>
 
@@ -69,14 +68,14 @@ export default function MemoriaPage() {
           onSubmit={addMemory}
           className="rounded-2xl border border-white/10 bg-white/[0.03] p-5"
         >
-          <label className="block text-xs font-medium uppercase tracking-wider text-zinc-500">
-            Nuevo recuerdo
+          <label className="block text-xs font-medium text-zinc-500">
+            Agregar una nota
           </label>
           <textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
             rows={3}
-            placeholder='Ej. "El cliente odia el tono corporativo" o "Presupuesto ads: $1.5k/mes"'
+            placeholder='Ej. "Vendo cursos de cocina" o "Mi cliente ideal tiene 30-45 años"'
             className="mt-2 w-full resize-none rounded-xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-white outline-none focus:border-amber-400/40"
           />
           <button
@@ -84,7 +83,7 @@ export default function MemoriaPage() {
             className="mt-3 inline-flex items-center gap-2 rounded-lg bg-amber-400 px-4 py-2 text-sm font-semibold text-black hover:bg-amber-300"
           >
             <Plus className="h-4 w-4" />
-            Guardar en memoria
+            Guardar nota
           </button>
         </form>
 

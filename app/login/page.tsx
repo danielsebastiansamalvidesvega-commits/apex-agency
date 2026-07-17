@@ -112,16 +112,15 @@ export default function LoginPage() {
           </span>
           <div>
             <div className="text-sm font-bold text-white">APEX</div>
-            <div className="text-[11px] text-zinc-500">Agency OS</div>
+            <div className="text-[11px] text-zinc-500">Tu equipo digital</div>
           </div>
         </Link>
 
         <h1 className="mt-6 text-2xl font-semibold tracking-tight text-white">
-          Bienvenido de nuevo
+          Qué bueno verte
         </h1>
         <p className="mt-2 text-sm text-zinc-400">
-          Accede a tu workspace privado: proyectos, memoria y conversaciones
-          solo tuyos.
+          Entra a tu cuenta para seguir con tus negocios y chats.
         </p>
 
         <Suspense

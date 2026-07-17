@@ -111,7 +111,7 @@ export function GoogleAuthButton({
 }
 
 export function AuthDivider({
-  text = "o continúa con email",
+  text = "o con tu email",
 }: {
   text?: string;
 }) {

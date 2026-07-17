@@ -66,7 +66,7 @@ export function AppSidebar({ variant = "desktop", onNavigate }: Props) {
             <div className="text-sm font-bold tracking-tight text-white group-hover:text-amber-200">
               APEX
             </div>
-            <div className="text-[11px] text-zinc-500">Agency OS · Senior</div>
+            <div className="text-[11px] text-zinc-500">Tu equipo digital</div>
           </div>
         </Link>
       </div>
@@ -104,18 +104,18 @@ export function AppSidebar({ variant = "desktop", onNavigate }: Props) {
 
       <div className="space-y-2 border-t border-white/10 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
         <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
-          <p className="text-[11px] font-medium uppercase tracking-wider text-zinc-500">
-            Proyecto activo
+          <p className="text-[11px] font-medium text-zinc-500">
+            Negocio actual
           </p>
           <p className="mt-1 truncate text-sm text-zinc-200">
-            {projectName ?? "Ninguno seleccionado"}
+            {projectName ?? "Aún no elegiste uno"}
           </p>
           <Link
             href="/app/proyectos"
             onClick={onNavigate}
             className="mt-2 inline-block text-xs font-medium text-amber-400 hover:text-amber-300"
           >
-            Gestionar →
+            Ver mis negocios →
           </Link>
         </div>
 
