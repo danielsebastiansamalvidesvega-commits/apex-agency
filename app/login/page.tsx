@@ -112,7 +112,7 @@ export default function LoginPage() {
           </span>
           <div>
             <div className="text-sm font-bold text-white">APEX</div>
-            <div className="text-[11px] text-zinc-500">Agency OS</div>
+            <div className="text-[11px] text-zinc-500">Tu agencia digital</div>
           </div>
         </Link>
 
@@ -120,8 +120,7 @@ export default function LoginPage() {
           Bienvenido de nuevo
         </h1>
         <p className="mt-2 text-sm text-zinc-400">
-          Accede a tu workspace privado: proyectos, memoria y conversaciones
-          solo tuyos.
+          Entra a tu espacio: proyectos, memoria y chats privados.
         </p>
 
         <Suspense

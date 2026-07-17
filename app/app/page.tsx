@@ -10,14 +10,14 @@ export default function DashboardPage() {
     <div className="h-full overflow-y-auto overscroll-contain">
       <div className="border-b border-white/10 px-4 py-5 sm:px-6 sm:py-6">
         <p className="text-xs font-medium uppercase tracking-wider text-amber-400/90">
-          Command Center
+          Tu workspace
         </p>
         <h1 className="mt-1 text-xl font-semibold tracking-tight text-white sm:text-2xl">
           Bienvenido a APEX
         </h1>
         <p className="mt-2 max-w-2xl text-sm text-zinc-400">
-          Operas con un equipo senior unificado: marketing digital, arquitectura
-          y desarrollo full-stack. Elige un módulo o abre el Consejo.
+          Marketing, tecnología y código en un solo lugar. Elige un módulo o
+          abre el Consejo para empezar.
         </p>
       </div>
 
@@ -30,17 +30,17 @@ export default function DashboardPage() {
             </span>
           </div>
           <h2 className="mt-2 text-xl font-semibold text-white">
-            Abre el Consejo Senior
+            Habla con el Consejo
           </h2>
           <p className="mt-2 max-w-xl text-sm text-zinc-400">
-            Auditoría de negocio, GTM + stack + MVP, o diagnóstico de ROAS +
-            tracking. Una conversación, tres roles alineados.
+            Ideas de negocio, ventas, web o producto. Una conversación, un plan
+            claro para avanzar.
           </p>
           <Link
             href="/app/consejo"
-            className="mt-4 inline-flex items-center gap-2 rounded-xl bg-amber-400 px-4 py-2.5 text-sm font-semibold text-black hover:bg-amber-300"
+            className="mt-4 inline-flex min-h-[44px] items-center gap-2 rounded-xl bg-amber-400 px-4 py-2.5 text-sm font-semibold text-black transition hover:bg-amber-300"
           >
-            Ir al Consejo
+            Abrir Consejo
             <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
@@ -48,16 +48,16 @@ export default function DashboardPage() {
         <div className="space-y-3">
           <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
             <TrendingUp className="h-4 w-4 text-emerald-400" />
-            <p className="mt-2 text-sm font-medium text-white">Growth first</p>
+            <p className="mt-2 text-sm font-medium text-white">Crecimiento</p>
             <p className="mt-1 text-xs text-zinc-500">
-              Cada recomendación conecta CAC, LTV y capacidad de ship.
+              Recomendaciones orientadas a vender más y mejor.
             </p>
           </div>
           <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
             <Shield className="h-4 w-4 text-sky-400" />
-            <p className="mt-2 text-sm font-medium text-white">Tech soberano</p>
+            <p className="mt-2 text-sm font-medium text-white">Tecnología</p>
             <p className="mt-1 text-xs text-zinc-500">
-              Decisiones de arquitectura con trade-offs y time-to-value.
+              Decisiones técnicas claras, sin complicaciones innecesarias.
             </p>
           </div>
         </div>

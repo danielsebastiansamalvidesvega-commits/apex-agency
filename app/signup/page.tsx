@@ -151,7 +151,7 @@ export default function SignupPage() {
           </span>
           <div>
             <div className="text-sm font-bold text-white">APEX</div>
-            <div className="text-[11px] text-zinc-500">Agency OS</div>
+            <div className="text-[11px] text-zinc-500">Tu agencia digital</div>
           </div>
         </Link>
 
@@ -159,7 +159,7 @@ export default function SignupPage() {
           Crea tu cuenta
         </h1>
         <p className="mt-2 text-sm text-zinc-400">
-          Entra con Google en un clic, o regístrate con email.
+          Google en un clic, o email y contraseña. Listo en un minuto.
         </p>
 
         <div className="mt-8">

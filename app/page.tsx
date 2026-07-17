@@ -13,41 +13,41 @@ import {
 const pillars = [
   {
     icon: Users,
-    title: "Consejo Senior",
-    desc: "CMO + CTO + Lead Dev en una sola mesa. Decisiones de negocio y producto sin silos.",
+    title: "Consejo",
+    desc: "Marketing, tecnología y producto en una sola conversación. Decisiones claras.",
   },
   {
     icon: Target,
-    title: "Estrategia & GTM",
-    desc: "Posicionamiento, ICP, oferta, embudos y planes 30/60/90 con métricas reales.",
+    title: "Estrategia",
+    desc: "Cliente ideal, oferta, embudos y plan de crecimiento con métricas útiles.",
   },
   {
     icon: Megaphone,
-    title: "Ads & Creativos",
-    desc: "Estructuras de campaña, testing, scripts UGC, copy y scaling con unit economics.",
+    title: "Anuncios & creativos",
+    desc: "Campañas, testing, scripts y copy listos para Meta y redes.",
   },
   {
     icon: Cpu,
-    title: "Arquitectura CTO",
-    desc: "Stack, data model, integraciones, performance y roadmap técnico orientado a growth.",
+    title: "Tecnología",
+    desc: "Stack, arquitectura e integraciones orientados a resultados de negocio.",
   },
   {
     icon: Code2,
-    title: "Code Lab",
-    desc: "Código production-ready, componentes, APIs y specs de implementación shippables.",
+    title: "Código",
+    desc: "Componentes, APIs y código listo para implementar en tu producto.",
   },
   {
     icon: Sparkles,
     title: "Proyectos + Memoria",
-    desc: "Cuentas privadas, historial de chat y hechos que APEX recuerda entre sesiones.",
+    desc: "Tu contexto privado: historial, proyectos y lo que APEX recuerda de ti.",
   },
 ];
 
 const vs = [
-  { label: "Solo copy / creativos", apex: "Estrategia + media + tech + código" },
-  { label: "Chat genérico sin cuenta", apex: "Login profesional y datos por usuario" },
-  { label: "Sin memoria", apex: "Proyectos, historial y recuerdos persistentes" },
-  { label: "Marketing aislado", apex: "Growth unido a producto y arquitectura" },
+  { label: "Solo textos sueltos", apex: "Estrategia + anuncios + tech + código" },
+  { label: "Chat genérico sin cuenta", apex: "Tu espacio privado con historial" },
+  { label: "Empiezas de cero cada vez", apex: "Proyectos y memoria entre sesiones" },
+  { label: "Marketing o tech por separado", apex: "Todo alineado al crecimiento" },
 ];
 
 export default function LandingPage() {
@@ -88,20 +88,20 @@ export default function LandingPage() {
           <div className="mb-5 inline-flex max-w-full items-center gap-2 rounded-full border border-amber-400/25 bg-amber-400/10 px-3 py-1.5 text-[11px] font-medium leading-snug text-amber-200 sm:mb-6 sm:text-xs">
             <Sparkles className="h-3.5 w-3.5 shrink-0" />
             <span className="line-clamp-2">
-              Agencia digital + equipo técnico senior en un solo workspace
+              Marketing + tecnología + código · en un solo workspace
             </span>
           </div>
           <h1 className="max-w-4xl text-[1.85rem] font-semibold leading-[1.15] tracking-tight text-white sm:text-6xl sm:leading-[1.05]">
             Tu{" "}
             <span className="bg-gradient-to-r from-amber-200 via-amber-400 to-orange-400 bg-clip-text text-transparent">
-              Director de Marketing + CTO + Lead Full-Stack
+              equipo de marketing y tech
             </span>{" "}
             en un solo sistema.
           </h1>
           <p className="mt-5 max-w-2xl text-base leading-relaxed text-zinc-400 sm:mt-6 sm:text-lg">
-            APEX actúa como una agencia senior de 15+ años de experiencia:
-            growth, ads, copy, arquitectura y código — con decisiones
-            ejecutivas, no respuestas genéricas de chatbot.
+            APEX te ayuda a vender mejor, escribir textos, armar anuncios y
+            tomar decisiones técnicas — con el rigor de una agencia senior, sin
+            enredarte.
           </p>
           <div className="mt-7 flex flex-col gap-2.5 sm:mt-8 sm:flex-row sm:flex-wrap sm:gap-3">
             <Link
@@ -121,9 +121,9 @@ export default function LandingPage() {
 
           <div className="mt-12 grid gap-3 sm:grid-cols-3">
             {[
-              ["CMO", "Growth, media, copy, funnels, unit economics"],
-              ["CTO", "Arquitectura, stack, data, seguridad, roadmap"],
-              ["Lead Dev", "Código, APIs, UI, ship con calidad"],
+              ["Marketing", "Crecimiento, anuncios, copy y embudos"],
+              ["Tecnología", "Arquitectura, stack y decisiones de producto"],
+              ["Código", "APIs, interfaces e implementación lista"],
             ].map(([role, desc]) => (
               <div
                 key={role}
@@ -141,12 +141,11 @@ export default function LandingPage() {
         <section className="border-y border-white/10 bg-white/[0.02] py-12 sm:py-16">
           <div className="mx-auto max-w-6xl px-4 sm:px-6">
             <h2 className="text-xl font-semibold tracking-tight text-white sm:text-3xl">
-              Una agencia completa. No un prompt bonito.
+              Todo lo que necesitas, sin fricción.
             </h2>
             <p className="mt-3 max-w-2xl text-sm text-zinc-400 sm:text-base">
-              Módulos operativos para dueños de negocio, freelancers, e-commerce
-              y equipos que quieren operar a nivel senior sin contratar 8
-              roles.
+              Para dueños de negocio, freelancers y equipos que quieren
+              resultados de agencia sin montar un equipo completo.
             </p>
             <div className="mt-8 grid gap-3 sm:mt-10 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
               {pillars.map((p) => (
@@ -195,17 +194,17 @@ export default function LandingPage() {
         <section className="mx-auto max-w-6xl px-4 pb-[max(5rem,env(safe-area-inset-bottom))] sm:px-6 sm:pb-24">
           <div className="rounded-3xl border border-amber-400/20 bg-gradient-to-br from-amber-400/15 via-transparent to-orange-500/10 p-6 sm:p-12">
             <h2 className="max-w-xl text-xl font-semibold text-white sm:text-3xl">
-              Lista para operar como agencia senior hoy.
+              Empieza hoy. Es simple.
             </h2>
             <p className="mt-3 max-w-xl text-sm text-zinc-400 sm:text-base">
-              Crea tu cuenta, define un proyecto y abre el Consejo. APEX
-              recuerda tu contexto y guarda historial privado por usuario.
+              Crea tu cuenta, agrega tu proyecto y abre el Consejo. APEX
+              recuerda tu contexto y guarda tu historial de forma privada.
             </p>
             <Link
               href="/signup"
               className="mt-6 inline-flex min-h-[48px] w-full items-center justify-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-black transition hover:bg-zinc-200 sm:w-auto"
             >
-              Crear cuenta y abrir workspace
+              Crear cuenta gratis
               <ArrowRight className="h-4 w-4" />
             </Link>
           </div>

@@ -268,16 +268,16 @@ export function ChatPanel({ moduleId, role, title, subtitle, starters }: Props) 
           </div>
         ) : messages.length === 0 ? (
           <div className="mx-auto max-w-3xl">
-            <div className="mb-4 rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.06] to-transparent p-4 sm:mb-6 sm:p-6">
+            <div className="mb-4 rounded-2xl border border-white/10 bg-gradient-to-br from-amber-400/10 to-transparent p-4 sm:mb-6 sm:p-6">
               <p className="text-sm leading-relaxed text-zinc-300">
-                Hilo privado con memoria. APEX recuerda proyectos y hechos entre
-                sesiones.
+                Conversación privada. APEX usa tu proyecto y memoria para
+                responder con contexto — no empiezas de cero cada vez.
               </p>
             </div>
             {starters.length > 0 && (
               <div className="grid gap-2">
-                <p className="mb-0.5 text-[11px] font-medium uppercase tracking-wider text-zinc-500">
-                  Empieza con
+                <p className="mb-0.5 text-xs font-medium text-zinc-500">
+                  Sugerencias para empezar
                 </p>
                 {starters.map((s) => (
                   <button
@@ -387,11 +387,11 @@ export function ChatPanel({ moduleId, role, title, subtitle, starters }: Props) 
 function roleLabel(role: RoleMode) {
   switch (role) {
     case "cmo":
-      return "CMO";
+      return "Marketing";
     case "cto":
-      return "CTO";
+      return "Tech";
     case "lead":
-      return "Lead Dev";
+      return "Código";
     default:
       return "Consejo";
   }

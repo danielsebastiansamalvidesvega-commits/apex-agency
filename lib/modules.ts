@@ -35,10 +35,9 @@ export const MODULES: ModuleDef[] = [
   {
     id: "dashboard",
     href: "/app",
-    label: "Command Center",
+    label: "Inicio",
     short: "Inicio",
-    description:
-      "Visión ejecutiva del negocio, prioridades y próximos movimientos.",
+    description: "Resumen y acceso rápido a todo tu workspace.",
     role: "agencia",
     icon: "layout",
     starters: [],
@@ -46,10 +45,10 @@ export const MODULES: ModuleDef[] = [
   {
     id: "consejo",
     href: "/app/consejo",
-    label: "Consejo Senior",
+    label: "Consejo",
     short: "Consejo",
     description:
-      "Mesa ejecutiva: CMO + CTO + Lead. Decisiones de negocio, ventas y producto.",
+      "Tu mesa de expertos: marketing, tecnología y producto en una sola charla.",
     role: "agencia",
     icon: "users",
     starters: [
@@ -64,7 +63,7 @@ export const MODULES: ModuleDef[] = [
     label: "Estrategia",
     short: "Estrategia",
     description:
-      "Posicionamiento, cliente ideal, oferta, embudos y plan de crecimiento (GTM).",
+      "Cliente ideal, mercado, oferta y plan de crecimiento claro.",
     role: "cmo",
     icon: "target",
     starters: [
@@ -76,10 +75,10 @@ export const MODULES: ModuleDef[] = [
   {
     id: "copy",
     href: "/app/copy",
-    label: "Copy & Creativos",
+    label: "Copy & textos",
     short: "Copy",
     description:
-      "Página de ventas, ganchos, objeciones y posts listos para Facebook/Meta.",
+      "Páginas de venta, posts, ganchos y mensajes listos para publicar.",
     role: "cmo",
     icon: "pen",
     starters: [
@@ -91,10 +90,10 @@ export const MODULES: ModuleDef[] = [
   {
     id: "ads",
     href: "/app/ads",
-    label: "Anuncios (Ads)",
+    label: "Anuncios",
     short: "Ads",
     description:
-      "Estructura de campañas Meta/Facebook, testing de creativos y scaling.",
+      "Campañas en Meta/Facebook: estructura, creativos y cómo escalar.",
     role: "cmo",
     icon: "megaphone",
     starters: [
@@ -106,10 +105,10 @@ export const MODULES: ModuleDef[] = [
   {
     id: "tech",
     href: "/app/tech",
-    label: "Arquitectura & Tech",
+    label: "Tecnología",
     short: "Tech",
     description:
-      "Stack, arquitectura, integraciones, performance, seguridad y roadmap técnico.",
+      "Stack, arquitectura, integraciones y decisiones técnicas con sentido de negocio.",
     role: "cto",
     icon: "cpu",
     starters: [
@@ -124,7 +123,7 @@ export const MODULES: ModuleDef[] = [
     label: "Código",
     short: "Código",
     description:
-      "Programación lista para usar: componentes, APIs, landings y refactors.",
+      "Componentes, APIs y código listo para implementar en tu producto.",
     role: "lead",
     icon: "code",
     starters: [
@@ -139,7 +138,7 @@ export const MODULES: ModuleDef[] = [
     label: "Proyectos",
     short: "Proyectos",
     description:
-      "Workspaces por marca o cliente: contexto, notas y documentos guardados.",
+      "Tus marcas o clientes: contexto, notas y documentos guardados.",
     role: "agencia",
     icon: "folder",
     starters: [],
@@ -150,7 +149,7 @@ export const MODULES: ModuleDef[] = [
     label: "Memoria",
     short: "Memoria",
     description:
-      "Hechos y preferencias que APEX recuerda entre sesiones, solo para ti.",
+      "Lo que APEX recuerda de ti entre sesiones (privado, solo tuyo).",
     role: "agencia",
     icon: "brain",
     starters: [],

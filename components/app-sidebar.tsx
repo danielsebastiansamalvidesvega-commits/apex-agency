@@ -66,7 +66,7 @@ export function AppSidebar({ variant = "desktop", onNavigate }: Props) {
             <div className="text-sm font-bold tracking-tight text-white group-hover:text-amber-200">
               APEX
             </div>
-            <div className="text-[11px] text-zinc-500">Agency OS</div>
+            <div className="text-[11px] text-zinc-500">Tu agencia digital</div>
           </div>
         </Link>
       </div>
