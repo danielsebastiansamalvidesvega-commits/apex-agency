@@ -39,7 +39,6 @@ export default function SignupPage() {
 
     try {
       const supabase = createClient();
-      // En producción esto es https://apex-agency-nine.vercel.app (no localhost)
       const origin = window.location.origin;
 
       const { data, error: signUpError } = await supabase.auth.signUp({
@@ -117,7 +116,7 @@ export default function SignupPage() {
             </li>
             <li className="flex gap-2">
               <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-amber-400/80" />
-              El enlace te llevará de vuelta a APEX (no a localhost).
+              El enlace te llevará de vuelta a APEX para activar tu cuenta.
             </li>
           </ul>
           <Link
