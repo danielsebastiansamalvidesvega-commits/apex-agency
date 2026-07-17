@@ -132,17 +132,24 @@ export async function POST(req: Request) {
     const modelId =
       process.env.XAI_MODEL?.trim() || "grok-build-0.1";
 
+    // Only some models accept reasoningEffort; grok-build-0.1 rejects it
+    const supportsReasoningEffort =
+      modelId.includes("grok-4.5") ||
+      modelId.includes("grok-4.3") ||
+      modelId.includes("grok-4.20");
+
     const result = streamText({
       model: xai(modelId),
       system,
       messages: await convertToModelMessages(modelMessages),
       maxOutputTokens: MAX_OUTPUT_TOKENS,
-      providerOptions: {
-        xai: {
-          // Avoid hidden reasoning tokens when the API supports it
-          reasoningEffort: "none",
-        },
-      },
+      ...(supportsReasoningEffort
+        ? {
+            providerOptions: {
+              xai: { reasoningEffort: "none" as const },
+            },
+          }
+        : {}),
     });
 
     return result.toUIMessageStreamResponse({
