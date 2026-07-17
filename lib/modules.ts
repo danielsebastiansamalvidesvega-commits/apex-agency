@@ -48,13 +48,13 @@ export const MODULES: ModuleDef[] = [
     label: "Consejo Senior",
     short: "Consejo",
     description:
-      "Mesa ejecutiva: CMO + CTO + Lead Full-Stack en un solo hilo de decisiones.",
+      "Mesa ejecutiva + ecosistema de ventas: avatar, oferta, copy y sistema repetible.",
     role: "agencia",
     icon: "users",
     starters: [
-      "Audita mi negocio y dime las 5 palancas de crecimiento más fuertes este trimestre.",
-      "Quiero lanzar un SaaS B2B en LATAM: plan de go-to-market + stack técnico + MVP en 30 días.",
-      "Mi ROAS bajó 40%. Diagnóstico CMO + acciones técnicas de tracking y landing.",
+      "Quiero construir un ecosistema de ventas completo para [tu nicho]: avatar de cliente, problema principal, producto digital que lo resuelva, y estructura de contenido para venderlo en Facebook. Dame cada pieza por separado.",
+      "Toma todo lo que hemos creado en esta conversación —avatar, investigación, producto, página de ventas, objeciones— y resume el sistema completo en un flujo de 5 pasos que pueda repetir cada vez que lance un producto nuevo.",
+      "Audita en qué sigo perdiendo tiempo (investigación, avatar, sales page, objeciones, posts) y dame el plan de 48h para resolverlo con el sistema APEX.",
     ],
   },
   {
@@ -63,13 +63,13 @@ export const MODULES: ModuleDef[] = [
     label: "Estrategia & GTM",
     short: "Estrategia",
     description:
-      "Posicionamiento, ICP, oferta, embudos, pricing y plan de crecimiento.",
+      "Avatar real, mercado, oferta/producto y sistema de lanzamiento repetible.",
     role: "cmo",
     icon: "target",
     starters: [
-      "Diseña un posicionamiento y oferta irresistible para [mi industria].",
-      "Arma un GTM de 90 días con métricas y hitos semanales.",
-      "Define ICP, buyer persona y mensajes por etapa del embudo.",
+      "Analiza el nicho de [tu tema] y créame un avatar de cliente específico: no genérico. Edad aprox, problema exacto, palabras que usaría y qué lo detiene de comprar.",
+      "Analiza el mercado de [tu nicho]. Dime los 5 problemas más urgentes, qué soluciones ya existen y qué les sigue faltando.",
+      "Con base en este problema: [describe el problema], dame la estructura completa de una herramienta/producto simple que lo resuelva en menos de 30 minutos. Pasos concretos, sin teoría.",
     ],
   },
   {
@@ -78,13 +78,13 @@ export const MODULES: ModuleDef[] = [
     label: "Copy & Creativos",
     short: "Copy",
     description:
-      "Headlines, scripts, emails, landing copy y frameworks de creativos ganadores.",
+      "Página de ventas, objeciones, ganchos y posts listos para Facebook/Meta.",
     role: "cmo",
     icon: "pen",
     starters: [
-      "Escribe 10 ángulos creativos y 5 scripts UGC de 15–30s para Meta Ads.",
-      "Redacta la home completa: hero, prueba social, oferta, objeciones y CTA.",
-      "Crea una secuencia de email de 5 emails para nurture post-lead.",
+      "Escribe una página de ventas para [tu producto]. Incluye: gancho principal, 3 dolores del cliente, cómo mi producto los resuelve, 3 objeciones con respuesta, y un cierre con urgencia.",
+      "Dame las 5 objeciones más comunes antes de comprar [tu producto], y una respuesta corta y directa para cada una.",
+      "Escribe 5 posts para Facebook sobre [tu tema], cada uno con un gancho distinto de máximo 4 líneas. Deben prometer un resultado concreto, no un consejo genérico.",
     ],
   },
   {
@@ -93,13 +93,13 @@ export const MODULES: ModuleDef[] = [
     label: "Media & Ads",
     short: "Ads",
     description:
-      "Estructura de campañas, presupuestos, testing, creative matrix y scaling.",
+      "Estructura Meta/Facebook alineada al avatar, ángulos y testing de creativos.",
     role: "cmo",
     icon: "megaphone",
     starters: [
-      "Diseña la estructura de campañas Meta + Google para un presupuesto de $2,000/mes.",
-      "Plan de testing de creativos: hipótesis, variables y criterios de kill/scale.",
-      "Cómo escalar de $50/día a $500/día sin romper el CPA.",
+      "Con este avatar y oferta [resumen], diseña la estructura de campañas Facebook/Meta y 5 ángulos creativos con resultado concreto.",
+      "Plan de testing de creativos para [producto]: hipótesis, variables y criterios de kill/scale.",
+      "Cómo escalar de $50/día a $500/día en Meta sin romper el CPA, alineado a mi página de ventas.",
     ],
   },
   {
@@ -112,9 +112,9 @@ export const MODULES: ModuleDef[] = [
     role: "cto",
     icon: "cpu",
     starters: [
-      "Propón arquitectura y stack para un marketplace MVP multi-tenant.",
-      "Auditoría técnica: qué priorizar en performance, SEO y conversiones.",
-      "Diseña el data model y eventos de tracking para growth analytics.",
+      "Propón el stack mínimo para landing de ventas + captura de leads + tracking de Meta para [producto].",
+      "Arquitectura de una herramienta digital simple que resuelva [problema] en <30 min de uso.",
+      "Diseña el data model y eventos de tracking del embudo (view → lead → compra).",
     ],
   },
   {
@@ -127,9 +127,9 @@ export const MODULES: ModuleDef[] = [
     role: "lead",
     icon: "code",
     starters: [
-      "Genera un componente React de pricing table con toggle mensual/anual.",
-      "API route Next.js para checkout con validación Zod y manejo de errores.",
-      "Refactoriza este código y explica trade-offs + tests mínimos.",
+      "Genera la estructura de una landing de ventas (secciones del copy) en React/Next listo para pegar.",
+      "API route Next.js para captura de lead con validación Zod.",
+      "Componente de pricing/CTA con urgencia y toggle si aplica.",
     ],
   },
   {
