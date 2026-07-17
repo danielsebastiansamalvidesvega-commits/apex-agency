@@ -5,7 +5,7 @@ import {
   getBillingProfile,
   getTodayMessageCount,
 } from "@/lib/billing";
-import { isStripeConfigured } from "@/lib/stripe";
+import { isLemonConfigured } from "@/lib/lemon";
 import { PLAN_ORDER, PLANS } from "@/lib/plans";
 
 export async function GET() {
@@ -28,7 +28,10 @@ export async function GET() {
     messagesLimit: plan.messagesPerDay,
     maxProjects: plan.maxProjects,
     modules: plan.modules,
-    stripeConfigured: isStripeConfigured(),
+    /** Lemon Squeezy ready */
+    paymentsConfigured: isLemonConfigured(),
+    stripeConfigured: isLemonConfigured(), // compat con UI anterior
+    provider: "lemon_squeezy",
     hasCustomer: Boolean(profile.stripe_customer_id),
     plans: PLAN_ORDER.map((id) => PLANS[id]),
   });

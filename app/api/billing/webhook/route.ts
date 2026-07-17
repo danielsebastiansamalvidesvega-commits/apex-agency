@@ -1,128 +1,187 @@
 import { NextResponse } from "next/server";
-import type Stripe from "stripe";
-import { getStripe } from "@/lib/stripe";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { planIdFromStripePrice } from "@/lib/billing";
+import {
+  planIdFromLemonVariant,
+  verifyLemonSignature,
+} from "@/lib/lemon";
 
 export const runtime = "nodejs";
 
-async function syncSubscription(
-  sub: Stripe.Subscription,
-  userIdFallback?: string | null,
-) {
+type LemonMeta = {
+  event_name?: string;
+  custom_data?: { user_id?: string };
+};
+
+type LemonSubAttrs = {
+  status?: string;
+  customer_id?: number | string;
+  variant_id?: number | string;
+  product_id?: number | string;
+  renews_at?: string | null;
+  ends_at?: string | null;
+  user_email?: string;
+};
+
+async function applySubscription(opts: {
+  userId: string | null | undefined;
+  customerId: string | null;
+  subscriptionId: string | null;
+  variantId: string | number | null | undefined;
+  status: string;
+  periodEnd: string | null;
+  email?: string | null;
+}) {
   const admin = createAdminClient();
-  const customerId =
-    typeof sub.customer === "string" ? sub.customer : sub.customer.id;
-  const priceId = sub.items.data[0]?.price?.id;
-  const plan = planIdFromStripePrice(priceId);
-  const userId =
-    sub.metadata?.supabase_user_id ||
-    userIdFallback ||
-    (
-      await admin
-        .from("profiles")
-        .select("id")
-        .eq("stripe_customer_id", customerId)
-        .maybeSingle()
-    ).data?.id;
+  let userId = opts.userId || null;
+
+  if (!userId && opts.customerId) {
+    const { data } = await admin
+      .from("profiles")
+      .select("id")
+      .eq("stripe_customer_id", String(opts.customerId))
+      .maybeSingle();
+    userId = data?.id ?? null;
+  }
+
+  if (!userId && opts.email) {
+    const { data } = await admin
+      .from("profiles")
+      .select("id")
+      .eq("email", opts.email)
+      .maybeSingle();
+    userId = data?.id ?? null;
+  }
 
   if (!userId) {
-    console.error("[stripe webhook] no user for customer", customerId);
+    console.error("[lemon webhook] no user_id for event", opts);
     return;
   }
 
-  const status = sub.status;
-  const active = status === "active" || status === "trialing";
+  const active =
+    opts.status === "active" ||
+    opts.status === "on_trial" ||
+    opts.status === "paid" ||
+    opts.status === "cancelled"; // cancelled but still active until ends_at
 
-  // Stripe types vary by API version; read period end safely
-  const periodEndUnix =
-    (sub as { current_period_end?: number }).current_period_end ?? null;
+  // If fully expired / unpaid / expired
+  const expired =
+    opts.status === "expired" ||
+    opts.status === "unpaid" ||
+    opts.status === "past_due";
+
+  const plan = expired
+    ? "free"
+    : active
+      ? planIdFromLemonVariant(opts.variantId)
+      : "free";
+
+  // cancelled with ends_at in future → keep plan until period ends
+  let finalPlan = plan;
+  if (opts.status === "cancelled" && opts.periodEnd) {
+    const end = new Date(opts.periodEnd).getTime();
+    if (end > Date.now()) {
+      finalPlan = planIdFromLemonVariant(opts.variantId);
+    } else {
+      finalPlan = "free";
+    }
+  }
 
   await admin
     .from("profiles")
     .update({
-      plan: active ? plan : "free",
-      plan_status: status,
-      stripe_customer_id: customerId,
-      stripe_subscription_id: sub.id,
-      plan_period_end: periodEndUnix
-        ? new Date(periodEndUnix * 1000).toISOString()
-        : null,
+      plan: finalPlan,
+      plan_status: opts.status || "active",
+      stripe_customer_id: opts.customerId
+        ? String(opts.customerId)
+        : undefined,
+      stripe_subscription_id: opts.subscriptionId,
+      plan_period_end: opts.periodEnd,
       updated_at: new Date().toISOString(),
     })
     .eq("id", userId);
 }
 
 export async function POST(req: Request) {
-  const stripe = getStripe();
-  const secret = process.env.STRIPE_WEBHOOK_SECRET?.trim();
+  const rawBody = await req.text();
+  const signature = req.headers.get("x-signature");
 
-  if (!stripe || !secret) {
-    return NextResponse.json(
-      { error: "Webhook no configurado" },
-      { status: 503 },
-    );
+  const ok = await verifyLemonSignature(rawBody, signature);
+  if (!ok) {
+    // Allow skipping verify only if secret not set (dev) — still log
+    if (process.env.LEMON_SQUEEZY_WEBHOOK_SECRET?.trim()) {
+      return NextResponse.json({ error: "Firma inválida" }, { status: 401 });
+    }
+    console.warn("[lemon webhook] sin LEMON_SQUEEZY_WEBHOOK_SECRET — no verificado");
   }
 
-  const body = await req.text();
-  const sig = req.headers.get("stripe-signature");
-  if (!sig) {
-    return NextResponse.json({ error: "Sin firma" }, { status: 400 });
-  }
-
-  let event: Stripe.Event;
-  try {
-    event = stripe.webhooks.constructEvent(body, sig, secret);
-  } catch (err) {
-    console.error("[stripe webhook] signature", err);
-    return NextResponse.json({ error: "Firma inválida" }, { status: 400 });
-  }
+  let payload: {
+    meta?: LemonMeta;
+    data?: { id?: string; type?: string; attributes?: LemonSubAttrs };
+  };
 
   try {
-    switch (event.type) {
-      case "checkout.session.completed": {
-        const session = event.data.object as Stripe.Checkout.Session;
-        if (session.mode === "subscription" && session.subscription) {
-          const subId =
-            typeof session.subscription === "string"
-              ? session.subscription
-              : session.subscription.id;
-          const sub = await stripe.subscriptions.retrieve(subId);
-          await syncSubscription(
-            sub,
-            session.metadata?.supabase_user_id || null,
-          );
+    payload = JSON.parse(rawBody);
+  } catch {
+    return NextResponse.json({ error: "JSON inválido" }, { status: 400 });
+  }
+
+  const eventName = payload.meta?.event_name || "";
+  const attrs = payload.data?.attributes || {};
+  const userId = payload.meta?.custom_data?.user_id;
+  const customerId =
+    attrs.customer_id != null ? String(attrs.customer_id) : null;
+  const subscriptionId = payload.data?.id ? String(payload.data.id) : null;
+  const variantId = attrs.variant_id;
+  const status = attrs.status || "active";
+  const periodEnd = attrs.ends_at || attrs.renews_at || null;
+
+  try {
+    switch (eventName) {
+      case "subscription_created":
+      case "subscription_updated":
+      case "subscription_resumed":
+      case "subscription_unpaused":
+      case "subscription_payment_success":
+      case "subscription_cancelled":
+      case "subscription_expired":
+      case "subscription_paused":
+      case "subscription_payment_failed":
+      case "subscription_payment_recovered": {
+        await applySubscription({
+          userId,
+          customerId,
+          subscriptionId,
+          variantId,
+          status:
+            eventName === "subscription_expired" ? "expired" : status,
+          periodEnd,
+          email: attrs.user_email,
+        });
+        break;
+      }
+      case "order_created": {
+        // One-time orders — map variant if present
+        if (variantId && userId) {
+          const plan = planIdFromLemonVariant(variantId);
+          if (plan !== "free") {
+            await applySubscription({
+              userId,
+              customerId,
+              subscriptionId: subscriptionId || `order_${payload.data?.id}`,
+              variantId,
+              status: "active",
+              periodEnd: null,
+              email: attrs.user_email,
+            });
+          }
         }
         break;
       }
-      case "customer.subscription.updated":
-      case "customer.subscription.created": {
-        const sub = event.data.object as Stripe.Subscription;
-        await syncSubscription(sub);
-        break;
-      }
-      case "customer.subscription.deleted": {
-        const sub = event.data.object as Stripe.Subscription;
-        const admin = createAdminClient();
-        const customerId =
-          typeof sub.customer === "string" ? sub.customer : sub.customer.id;
-        await admin
-          .from("profiles")
-          .update({
-            plan: "free",
-            plan_status: "canceled",
-            stripe_subscription_id: null,
-            plan_period_end: null,
-            updated_at: new Date().toISOString(),
-          })
-          .eq("stripe_customer_id", customerId);
-        break;
-      }
       default:
-        break;
+        console.log("[lemon webhook] ignored event", eventName);
     }
-  } catch (err) {
-    console.error("[stripe webhook] handler", err);
+  } catch (e) {
+    console.error("[lemon webhook] handler", e);
     return NextResponse.json({ error: "Error interno" }, { status: 500 });
   }
 

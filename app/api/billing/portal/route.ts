@@ -1,37 +1,45 @@
 import { NextResponse } from "next/server";
 import { createClient, getAuthUser } from "@/lib/supabase/server";
-import { getStripe, isStripeConfigured } from "@/lib/stripe";
 import { getBillingProfile } from "@/lib/billing";
+import { getCustomerPortalUrl, isLemonConfigured } from "@/lib/lemon";
 
-export async function POST(req: Request) {
+export async function POST() {
   const user = await getAuthUser();
   if (!user) {
     return NextResponse.json({ error: "No autenticado" }, { status: 401 });
   }
 
-  if (!isStripeConfigured()) {
+  if (!isLemonConfigured()) {
     return NextResponse.json(
-      { error: "Pagos no configurados en el servidor." },
+      { error: "Lemon Squeezy no está configurado." },
       { status: 503 },
     );
   }
 
-  const stripe = getStripe()!;
   const supabase = await createClient();
   const billing = await getBillingProfile(supabase, user.id);
 
+  // Reutilizamos stripe_customer_id para guardar el customer id de Lemon
   if (!billing.stripe_customer_id) {
     return NextResponse.json(
-      { error: "No tienes una suscripción de Stripe aún. Elige un plan primero." },
+      {
+        error:
+          "Aún no tienes un cliente de pago. Suscríbete a un plan primero.",
+      },
       { status: 400 },
     );
   }
 
-  const origin = new URL(req.url).origin;
-  const session = await stripe.billingPortal.sessions.create({
-    customer: billing.stripe_customer_id,
-    return_url: `${origin}/app/planes`,
-  });
+  const url = await getCustomerPortalUrl(billing.stripe_customer_id);
+  if (!url) {
+    return NextResponse.json(
+      {
+        error:
+          "No se pudo abrir el portal. Revisa tu email de Lemon Squeezy o contacta soporte.",
+      },
+      { status: 404 },
+    );
+  }
 
-  return NextResponse.json({ url: session.url });
+  return NextResponse.json({ url, provider: "lemon" });
 }

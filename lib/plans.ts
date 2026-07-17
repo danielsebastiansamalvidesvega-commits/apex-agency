@@ -13,8 +13,8 @@ export type PlanDef = {
   maxProjects: number | null;
   modules: ModuleId[] | "all";
   features: string[];
-  /** Env var name for Stripe Price ID */
-  stripePriceEnv: string | null;
+  /** Env var for Lemon Squeezy variant ID */
+  lemonVariantEnv: string | null;
 };
 
 export const PLANS: Record<PlanId, PlanDef> = {
@@ -42,7 +42,7 @@ export const PLANS: Record<PlanId, PlanDef> = {
       "Memoria básica",
       "Historial de chat",
     ],
-    stripePriceEnv: null,
+    lemonVariantEnv: null,
   },
   pro: {
     id: "pro",
@@ -62,7 +62,7 @@ export const PLANS: Record<PlanId, PlanDef> = {
       "Guardar documentos ilimitados",
       "Soporte prioritario por email",
     ],
-    stripePriceEnv: "STRIPE_PRICE_PRO",
+    lemonVariantEnv: "LEMON_SQUEEZY_VARIANT_PRO",
   },
   agency: {
     id: "agency",
@@ -81,7 +81,7 @@ export const PLANS: Record<PlanId, PlanDef> = {
       "Prioridad en el modelo / colas",
       "Ideal para multi-cliente",
     ],
-    stripePriceEnv: "STRIPE_PRICE_AGENCY",
+    lemonVariantEnv: "LEMON_SQUEEZY_VARIANT_AGENCY",
   },
 };
 
@@ -111,6 +111,9 @@ export function resolveEffectivePlan(
     !status ||
     status === "active" ||
     status === "trialing" ||
+    status === "on_trial" ||
+    status === "paid" ||
+    status === "cancelled" || // Lemon: acceso hasta ends_at (plan ya resuelto en webhook)
     status === "free";
   if (!statusOk) return PLANS.free;
   return getPlan(planId);
