@@ -214,9 +214,12 @@ export function ChatPanel({ moduleId, role, title, subtitle, starters }: Props) 
       </div>
 
       {error && (
-        <div className="border-t border-red-500/30 bg-red-500/10 px-5 py-2 text-sm text-red-200">
-          {error.message ||
-            "Error al contactar el modelo. Revisa XAI_API_KEY en .env.local"}
+        <div className="border-t border-red-500/30 bg-red-500/10 px-5 py-3 text-sm text-red-200">
+          <p className="font-medium">No se pudo completar la respuesta</p>
+          <p className="mt-1 text-red-200/90">
+            {error.message ||
+              "Error al contactar el modelo. Revisa XAI_API_KEY en Vercel o .env.local"}
+          </p>
         </div>
       )}
 
