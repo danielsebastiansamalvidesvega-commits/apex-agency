@@ -38,16 +38,16 @@ const pillars = [
   },
   {
     icon: Sparkles,
-    title: "Proyectos",
-    desc: "Workspaces por marca o cliente con contexto persistente y deliverables guardados.",
+    title: "Proyectos + Memoria",
+    desc: "Cuentas privadas, historial de chat y hechos que APEX recuerda entre sesiones.",
   },
 ];
 
 const vs = [
   { label: "Solo copy / creativos", apex: "Estrategia + media + tech + código" },
-  { label: "Chat genérico", apex: "Roles senior con playbooks de 15+ años" },
+  { label: "Chat genérico sin cuenta", apex: "Login profesional y datos por usuario" },
+  { label: "Sin memoria", apex: "Proyectos, historial y recuerdos persistentes" },
   { label: "Marketing aislado", apex: "Growth unido a producto y arquitectura" },
-  { label: "Sin contexto de negocio", apex: "Proyectos con ICP, oferta y stack" },
 ];
 
 export default function LandingPage() {
@@ -68,16 +68,16 @@ export default function LandingPage() {
         </div>
         <div className="flex items-center gap-3">
           <Link
-            href="/app"
+            href="/login"
             className="hidden text-sm text-zinc-400 transition hover:text-white sm:inline"
           >
-            Entrar al workspace
+            Iniciar sesión
           </Link>
           <Link
-            href="/app/consejo"
+            href="/signup"
             className="inline-flex items-center gap-2 rounded-full bg-amber-400 px-4 py-2 text-sm font-semibold text-black transition hover:bg-amber-300"
           >
-            Abrir Consejo
+            Crear cuenta
             <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
@@ -103,17 +103,17 @@ export default function LandingPage() {
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Link
-              href="/app/consejo"
+              href="/signup"
               className="inline-flex items-center gap-2 rounded-xl bg-amber-400 px-5 py-3 text-sm font-semibold text-black shadow-lg shadow-amber-500/20 transition hover:bg-amber-300"
             >
-              Empezar gratis en el Consejo
+              Crear cuenta gratis
               <ArrowRight className="h-4 w-4" />
             </Link>
             <Link
-              href="/app/proyectos"
+              href="/login"
               className="inline-flex items-center gap-2 rounded-xl border border-white/15 bg-white/5 px-5 py-3 text-sm font-medium text-white transition hover:bg-white/10"
             >
-              Crear un proyecto
+              Ya tengo cuenta
             </Link>
           </div>
 
@@ -190,15 +190,14 @@ export default function LandingPage() {
               Lista para operar como agencia senior hoy.
             </h2>
             <p className="mt-3 max-w-xl text-zinc-400">
-              Configura tu API key de xAI, crea un proyecto y abre el Consejo.
-              En minutos tienes estrategia, media plan y specs técnicas
-              alineadas.
+              Crea tu cuenta, define un proyecto y abre el Consejo. APEX
+              recuerda tu contexto y guarda historial privado por usuario.
             </p>
             <Link
-              href="/app"
+              href="/signup"
               className="mt-6 inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-black transition hover:bg-zinc-200"
             >
-              Entrar al Command Center
+              Crear cuenta y abrir workspace
               <ArrowRight className="h-4 w-4" />
             </Link>
           </div>

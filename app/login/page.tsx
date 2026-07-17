@@ -1,0 +1,126 @@
+"use client";
+
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { FormEvent, Suspense, useState } from "react";
+import { createClient } from "@/lib/supabase/client";
+import { Loader2, Zap } from "lucide-react";
+
+function LoginForm() {
+  const router = useRouter();
+  const search = useSearchParams();
+  const next = search.get("next") || "/app";
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  async function onSubmit(e: FormEvent) {
+    e.preventDefault();
+    setError(null);
+    setLoading(true);
+    try {
+      const supabase = createClient();
+      const { error: err } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password,
+      });
+      if (err) {
+        setError(
+          err.message === "Invalid login credentials"
+            ? "Email o contraseña incorrectos."
+            : err.message,
+        );
+        setLoading(false);
+        return;
+      }
+      router.push(next);
+      router.refresh();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error al iniciar sesión");
+      setLoading(false);
+    }
+  }
+
+  return (
+    <form onSubmit={onSubmit} className="mt-8 space-y-4">
+      <label className="block text-sm text-zinc-400">
+        Email
+        <input
+          type="email"
+          required
+          autoComplete="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="mt-1.5 w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none focus:border-amber-400/40 focus:ring-2 focus:ring-amber-400/20"
+          placeholder="tu@empresa.com"
+        />
+      </label>
+      <label className="block text-sm text-zinc-400">
+        Contraseña
+        <input
+          type="password"
+          required
+          autoComplete="current-password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="mt-1.5 w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none focus:border-amber-400/40 focus:ring-2 focus:ring-amber-400/20"
+          placeholder="••••••••"
+        />
+      </label>
+
+      {error && (
+        <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-200">
+          {error}
+        </div>
+      )}
+
+      <button
+        type="submit"
+        disabled={loading}
+        className="flex w-full items-center justify-center gap-2 rounded-xl bg-amber-400 py-3 text-sm font-semibold text-black transition hover:bg-amber-300 disabled:opacity-50"
+      >
+        {loading && <Loader2 className="h-4 w-4 animate-spin" />}
+        Iniciar sesión
+      </button>
+    </form>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <div className="relative flex min-h-screen items-center justify-center px-4">
+      <div className="pointer-events-none absolute inset-0 apex-glow" />
+      <div className="relative w-full max-w-md rounded-3xl border border-white/10 bg-[#0c0c10]/90 p-8 shadow-2xl backdrop-blur">
+        <Link href="/" className="inline-flex items-center gap-2">
+          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-amber-300 to-orange-500 text-black">
+            <Zap className="h-5 w-5 fill-current" />
+          </span>
+          <div>
+            <div className="text-sm font-bold text-white">APEX</div>
+            <div className="text-[11px] text-zinc-500">Agency OS</div>
+          </div>
+        </Link>
+
+        <h1 className="mt-6 text-2xl font-semibold tracking-tight text-white">
+          Bienvenido de nuevo
+        </h1>
+        <p className="mt-2 text-sm text-zinc-400">
+          Accede a tu workspace privado: proyectos, memoria y conversaciones
+          solo tuyos.
+        </p>
+
+        <Suspense fallback={<div className="mt-8 h-40 animate-pulse rounded-xl bg-white/5" />}>
+          <LoginForm />
+        </Suspense>
+
+        <p className="mt-6 text-center text-sm text-zinc-500">
+          ¿No tienes cuenta?{" "}
+          <Link href="/signup" className="font-medium text-amber-400 hover:text-amber-300">
+            Crear cuenta
+          </Link>
+        </p>
+      </div>
+    </div>
+  );
+}

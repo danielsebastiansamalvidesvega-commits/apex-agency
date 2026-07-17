@@ -1,4 +1,5 @@
 import {
+  Brain,
   Code2,
   Cpu,
   FolderKanban,
@@ -20,6 +21,7 @@ const MAP: Record<ModuleDef["icon"], LucideIcon> = {
   cpu: Cpu,
   code: Code2,
   folder: FolderKanban,
+  brain: Brain,
 };
 
 export function ModuleIcon({

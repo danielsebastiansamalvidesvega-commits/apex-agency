@@ -1,30 +1,45 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { MODULES } from "@/lib/modules";
 import { cn } from "@/lib/utils";
 import { ModuleIcon } from "./icons";
 import { useEffect, useState } from "react";
-import { getActiveProject } from "@/lib/projects";
-import { Zap } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
+import { LogOut, Zap } from "lucide-react";
 
 export function AppSidebar() {
   const pathname = usePathname();
+  const router = useRouter();
   const [projectName, setProjectName] = useState<string | null>(null);
+  const [userLabel, setUserLabel] = useState<string | null>(null);
 
   useEffect(() => {
-    const refresh = () => setProjectName(getActiveProject()?.name ?? null);
-    refresh();
-    window.addEventListener("focus", refresh);
-    window.addEventListener("storage", refresh);
-    return () => {
-      window.removeEventListener("focus", refresh);
-      window.removeEventListener("storage", refresh);
-    };
+    let cancelled = false;
+    async function load() {
+      try {
+        const res = await fetch("/api/profile");
+        if (!res.ok) return;
+        const data = await res.json();
+        if (cancelled) return;
+        setProjectName(data.activeProject?.name ?? null);
+        setUserLabel(
+          data.profile?.full_name || data.user?.email?.split("@")[0] || null,
+        );
+      } catch {
+        /* ignore */
+      }
+    }
+    void load();
   }, [pathname]);
 
-  const nav = MODULES;
+  async function signOut() {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.push("/login");
+    router.refresh();
+  }
 
   return (
     <aside className="flex h-full w-[260px] shrink-0 flex-col border-r border-white/10 bg-[#09090c]">
@@ -43,7 +58,7 @@ export function AppSidebar() {
       </div>
 
       <nav className="flex-1 space-y-0.5 overflow-y-auto px-2 py-3">
-        {nav.map((m) => {
+        {MODULES.map((m) => {
           const active =
             m.href === "/app"
               ? pathname === "/app"
@@ -72,7 +87,7 @@ export function AppSidebar() {
         })}
       </nav>
 
-      <div className="border-t border-white/10 p-3">
+      <div className="space-y-2 border-t border-white/10 p-3">
         <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
           <p className="text-[11px] font-medium uppercase tracking-wider text-zinc-500">
             Proyecto activo
@@ -86,6 +101,20 @@ export function AppSidebar() {
           >
             Gestionar →
           </Link>
+        </div>
+
+        <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
+          <p className="truncate text-sm text-zinc-300">
+            {userLabel ?? "Cuenta"}
+          </p>
+          <button
+            type="button"
+            onClick={() => void signOut()}
+            className="mt-2 inline-flex items-center gap-1.5 text-xs font-medium text-zinc-500 transition hover:text-red-300"
+          >
+            <LogOut className="h-3.5 w-3.5" />
+            Cerrar sesión
+          </button>
         </div>
       </div>
     </aside>

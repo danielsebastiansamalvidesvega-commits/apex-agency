@@ -1,7 +1,7 @@
 "use client";
 
 import { useChat } from "@ai-sdk/react";
-import { DefaultChatTransport } from "ai";
+import { DefaultChatTransport, type UIMessage } from "ai";
 import {
   BookmarkPlus,
   Loader2,
@@ -10,13 +10,8 @@ import {
   Square,
   Trash2,
 } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { ModuleId, RoleMode } from "@/lib/modules";
-import {
-  getActiveProject,
-  projectToContext,
-  saveDeliverable,
-} from "@/lib/projects";
 import { SimpleMarkdown } from "./markdown";
 
 type Props = {
@@ -27,22 +22,28 @@ type Props = {
   starters: string[];
 };
 
+function textFromMessage(m: UIMessage) {
+  return m.parts
+    .filter((p): p is { type: "text"; text: string } => p.type === "text")
+    .map((p) => p.text)
+    .join("\n");
+}
+
 export function ChatPanel({ moduleId, role, title, subtitle, starters }: Props) {
   const [input, setInput] = useState("");
   const [projectName, setProjectName] = useState<string | null>(null);
+  const [projectId, setProjectId] = useState<string | null>(null);
+  const [projectContext, setProjectContext] = useState("");
+  const [conversationId, setConversationId] = useState<string | null>(null);
+  const [hydrated, setHydrated] = useState(false);
   const [savedFlash, setSavedFlash] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const contextRef = useRef({ role, moduleId, projectContext: "" });
+  const lastSavedCount = useRef(0);
 
   useEffect(() => {
-    const p = getActiveProject();
-    contextRef.current = {
-      role,
-      moduleId,
-      projectContext: projectToContext(p),
-    };
-    setProjectName(p?.name ?? null);
-  }, [role, moduleId]);
+    contextRef.current = { role, moduleId, projectContext };
+  }, [role, moduleId, projectContext]);
 
   const transport = useMemo(
     () =>
@@ -55,10 +56,111 @@ export function ChatPanel({ moduleId, role, title, subtitle, starters }: Props) 
 
   const { messages, sendMessage, status, stop, setMessages, error } = useChat({
     transport,
-    id: `apex-${moduleId}`,
+    id: `apex-${moduleId}-${projectId || "none"}`,
   });
 
   const busy = status === "submitted" || status === "streaming";
+
+  // Load profile + conversation history
+  useEffect(() => {
+    let cancelled = false;
+
+    async function load() {
+      setHydrated(false);
+      try {
+        const profileRes = await fetch("/api/profile");
+        let activeId: string | null = null;
+        let ctx = "";
+        let name: string | null = null;
+
+        if (profileRes.ok) {
+          const data = await profileRes.json();
+          if (data.activeProject) {
+            activeId = data.activeProject.id;
+            name = data.activeProject.name;
+            const p = data.activeProject;
+            ctx = [
+              `Nombre: ${p.name}`,
+              p.industry && `Industria: ${p.industry}`,
+              p.offer && `Oferta: ${p.offer}`,
+              p.audience && `Audiencia: ${p.audience}`,
+              p.goals && `Objetivos: ${p.goals}`,
+              p.stack && `Stack: ${p.stack}`,
+              p.budget && `Presupuesto: ${p.budget}`,
+              p.notes && `Notas: ${p.notes}`,
+            ]
+              .filter(Boolean)
+              .join("\n");
+          }
+        }
+
+        if (cancelled) return;
+        setProjectId(activeId);
+        setProjectName(name);
+        setProjectContext(ctx);
+
+        const qs = new URLSearchParams({ moduleId });
+        if (activeId) qs.set("projectId", activeId);
+        const convRes = await fetch(`/api/conversations?${qs}`);
+        if (convRes.ok) {
+          const { conversation, messages: dbMessages } = await convRes.json();
+          if (cancelled) return;
+          setConversationId(conversation.id);
+          const uiMessages: UIMessage[] = (dbMessages || []).map(
+            (m: { id: string; role: string; content: string }) => ({
+              id: m.id,
+              role: m.role as "user" | "assistant",
+              parts: [{ type: "text" as const, text: m.content }],
+            }),
+          );
+          setMessages(uiMessages);
+          lastSavedCount.current = uiMessages.length;
+        }
+      } catch {
+        /* ignore load errors — user may still chat if session ok */
+      } finally {
+        if (!cancelled) setHydrated(true);
+      }
+    }
+
+    void load();
+    return () => {
+      cancelled = true;
+    };
+  }, [moduleId, setMessages]);
+
+  // Persist new messages when a turn finishes
+  useEffect(() => {
+    if (!conversationId || !hydrated) return;
+    if (busy) return;
+    if (messages.length <= lastSavedCount.current) return;
+
+    const newOnes = messages.slice(lastSavedCount.current);
+    const payload = newOnes
+      .filter((m) => m.role === "user" || m.role === "assistant")
+      .map((m) => ({
+        role: m.role as "user" | "assistant",
+        content: textFromMessage(m),
+      }))
+      .filter((m) => m.content.trim());
+
+    if (!payload.length) {
+      lastSavedCount.current = messages.length;
+      return;
+    }
+
+    void fetch("/api/conversations", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        conversationId,
+        projectId,
+        messages: payload,
+      }),
+    }).then(() => {
+      lastSavedCount.current = messages.length;
+    });
+  }, [messages, busy, conversationId, hydrated, projectId]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -67,46 +169,56 @@ export function ChatPanel({ moduleId, role, title, subtitle, starters }: Props) 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     const text = input.trim();
-    if (!text || busy) return;
+    if (!text || busy || !hydrated) return;
     setInput("");
     await sendMessage({ text });
   }
 
   async function runStarter(text: string) {
-    if (busy) return;
+    if (busy || !hydrated) return;
     setInput("");
     await sendMessage({ text });
   }
 
-  function clearChat() {
+  const clearChat = useCallback(async () => {
     setMessages([]);
-  }
+    lastSavedCount.current = 0;
+    if (conversationId) {
+      await fetch("/api/conversations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "clear", conversationId }),
+      });
+    }
+  }, [conversationId, setMessages]);
 
-  function saveLastAsDeliverable() {
+  async function saveLastAsDeliverable() {
     const last = [...messages].reverse().find((m) => m.role === "assistant");
     if (!last) return;
-    const text = last.parts
-      .filter((p): p is { type: "text"; text: string } => p.type === "text")
-      .map((p) => p.text)
-      .join("\n");
+    const text = textFromMessage(last);
     if (!text.trim()) return;
 
-    const project = getActiveProject();
-    saveDeliverable({
-      projectId: project?.id ?? null,
-      moduleId,
-      title: `${title} · ${new Date().toLocaleString("es")}`,
-      content: text,
+    const res = await fetch("/api/deliverables", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        projectId,
+        moduleId,
+        title: `${title} · ${new Date().toLocaleString("es")}`,
+        content: text,
+      }),
     });
-    setSavedFlash(true);
-    setTimeout(() => setSavedFlash(false), 2000);
+    if (res.ok) {
+      setSavedFlash(true);
+      setTimeout(() => setSavedFlash(false), 2000);
+    }
   }
 
   return (
     <div className="flex h-full min-h-0 flex-col">
       <header className="flex flex-wrap items-start justify-between gap-3 border-b border-white/10 px-5 py-4">
         <div>
-          <div className="mb-1 flex items-center gap-2">
+          <div className="mb-1 flex flex-wrap items-center gap-2">
             <span className="inline-flex items-center gap-1 rounded-full border border-amber-400/30 bg-amber-400/10 px-2.5 py-0.5 text-[11px] font-medium uppercase tracking-wider text-amber-300">
               <Sparkles className="h-3 w-3" />
               {roleLabel(role)}
@@ -116,6 +228,9 @@ export function ChatPanel({ moduleId, role, title, subtitle, starters }: Props) 
                 Proyecto: {projectName}
               </span>
             )}
+            <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 text-[11px] text-zinc-500">
+              Memoria + historial activos
+            </span>
           </div>
           <h1 className="text-xl font-semibold tracking-tight text-white">
             {title}
@@ -133,7 +248,7 @@ export function ChatPanel({ moduleId, role, title, subtitle, starters }: Props) 
           </button>
           <button
             type="button"
-            onClick={clearChat}
+            onClick={() => void clearChat()}
             className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs font-medium text-zinc-300 transition hover:bg-white/10"
           >
             <Trash2 className="h-3.5 w-3.5" />
@@ -143,17 +258,21 @@ export function ChatPanel({ moduleId, role, title, subtitle, starters }: Props) 
       </header>
 
       <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5">
-        {messages.length === 0 ? (
+        {!hydrated ? (
+          <div className="flex items-center justify-center gap-2 py-20 text-sm text-zinc-500">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            Cargando tu historial y memoria…
+          </div>
+        ) : messages.length === 0 ? (
           <div className="mx-auto max-w-3xl">
             <div className="mb-6 rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.06] to-transparent p-6">
               <p className="text-sm leading-relaxed text-zinc-300">
-                Habla con el equipo senior de APEX. Obtén estrategia, ads, copy,
-                arquitectura y código en un solo flujo — con el rigor de una
-                agencia + CTO + lead dev de 15+ años.
+                Este hilo es privado y se guarda en tu cuenta. APEX recuerda tus
+                proyectos y hechos clave entre sesiones.
               </p>
             </div>
             {starters.length > 0 && (
-              <div className="grid gap-2 sm:grid-cols-1">
+              <div className="grid gap-2">
                 <p className="mb-1 text-xs font-medium uppercase tracking-wider text-zinc-500">
                   Empieza con
                 </p>
@@ -173,13 +292,7 @@ export function ChatPanel({ moduleId, role, title, subtitle, starters }: Props) 
         ) : (
           <div className="mx-auto max-w-3xl space-y-5">
             {messages.map((m) => {
-              const text = m.parts
-                .filter(
-                  (p): p is { type: "text"; text: string } => p.type === "text",
-                )
-                .map((p) => p.text)
-                .join("");
-
+              const text = textFromMessage(m);
               if (m.role === "user") {
                 return (
                   <div key={m.id} className="flex justify-end">
@@ -189,7 +302,6 @@ export function ChatPanel({ moduleId, role, title, subtitle, starters }: Props) 
                   </div>
                 );
               }
-
               return (
                 <div
                   key={m.id}
@@ -217,8 +329,7 @@ export function ChatPanel({ moduleId, role, title, subtitle, starters }: Props) 
         <div className="border-t border-red-500/30 bg-red-500/10 px-5 py-3 text-sm text-red-200">
           <p className="font-medium">No se pudo completar la respuesta</p>
           <p className="mt-1 text-red-200/90">
-            {error.message ||
-              "Error al contactar el modelo. Revisa XAI_API_KEY en Vercel o .env.local"}
+            {error.message || "Error al contactar el modelo."}
           </p>
         </div>
       )}
@@ -238,8 +349,8 @@ export function ChatPanel({ moduleId, role, title, subtitle, starters }: Props) 
               }
             }}
             rows={2}
-            placeholder="Pide estrategia, ads, arquitectura o código… (Enter envía, Shift+Enter nueva línea)"
-            className="min-h-[52px] flex-1 resize-none rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none ring-amber-400/0 transition placeholder:text-zinc-600 focus:border-amber-400/40 focus:ring-2 focus:ring-amber-400/20"
+            placeholder="Pide estrategia, ads, arquitectura o código… APEX lo recuerda."
+            className="min-h-[52px] flex-1 resize-none rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none transition placeholder:text-zinc-600 focus:border-amber-400/40 focus:ring-2 focus:ring-amber-400/20"
           />
           {busy ? (
             <button
@@ -253,7 +364,7 @@ export function ChatPanel({ moduleId, role, title, subtitle, starters }: Props) 
           ) : (
             <button
               type="submit"
-              disabled={!input.trim()}
+              disabled={!input.trim() || !hydrated}
               className="inline-flex h-[52px] items-center gap-2 rounded-xl bg-amber-400 px-4 text-sm font-semibold text-black transition hover:bg-amber-300 disabled:cursor-not-allowed disabled:opacity-40"
             >
               <Send className="h-4 w-4" />

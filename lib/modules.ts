@@ -6,7 +6,8 @@ export type ModuleId =
   | "ads"
   | "tech"
   | "code"
-  | "proyectos";
+  | "proyectos"
+  | "memoria";
 
 export type RoleMode = "agencia" | "cmo" | "cto" | "lead";
 
@@ -25,7 +26,8 @@ export interface ModuleDef {
     | "megaphone"
     | "cpu"
     | "code"
-    | "folder";
+    | "folder"
+    | "brain";
   starters: string[];
 }
 
@@ -139,6 +141,17 @@ export const MODULES: ModuleDef[] = [
       "Workspaces por marca o cliente: contexto, notas y deliverables guardados.",
     role: "agencia",
     icon: "folder",
+    starters: [],
+  },
+  {
+    id: "memoria",
+    href: "/app/memoria",
+    label: "Memoria",
+    short: "Memoria",
+    description:
+      "Hechos y preferencias que APEX recuerda entre sesiones, solo para ti.",
+    role: "agencia",
+    icon: "brain",
     starters: [],
   },
 ];

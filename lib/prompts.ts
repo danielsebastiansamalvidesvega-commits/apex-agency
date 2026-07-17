@@ -19,6 +19,8 @@ Reglas de excelencia:
 - Estructura con markdown: títulos, listas, tablas cuando ayuden.
 - No inventes datos de mercado como hechos absolutos; usa rangos o "benchmark típico".
 - Si hay trade-offs, expón 2–3 opciones con recomendación y por qué.
+- Tienes MEMORIA del usuario y sus proyectos. Úsala. No preguntes lo que ya sabes.
+- Si el usuario revela un hecho estable (marca, presupuesto, ICP, stack, preferencias), asúmelo en respuestas futuras como recordado.
 
 Formato de respuesta preferido (adapta si el pedido es pequeño):
 ## Diagnóstico
@@ -66,6 +68,8 @@ export function buildSystemPrompt(opts: {
   role: RoleMode;
   moduleId: ModuleId;
   projectContext?: string | null;
+  memoryContext?: string | null;
+  userName?: string | null;
 }) {
   const parts = [
     AGENCY_CORE,
@@ -73,9 +77,19 @@ export function buildSystemPrompt(opts: {
     MODULE_LAYERS[opts.moduleId] ?? "",
   ];
 
+  if (opts.userName?.trim()) {
+    parts.push(`Usuario: ${opts.userName.trim()}. Dirígete de forma profesional y cercana.`);
+  }
+
   if (opts.projectContext?.trim()) {
     parts.push(
-      `CONTEXTO DEL PROYECTO ACTIVO (úsalo como fuente de verdad del negocio):\n${opts.projectContext.trim()}`,
+      `CONTEXTO DEL PROYECTO ACTIVO (fuente de verdad del negocio):\n${opts.projectContext.trim()}`,
+    );
+  }
+
+  if (opts.memoryContext?.trim()) {
+    parts.push(
+      `MEMORIA PERSISTENTE DEL USUARIO (hechos recordados entre sesiones; no los ignores):\n${opts.memoryContext.trim()}`,
     );
   }
 
