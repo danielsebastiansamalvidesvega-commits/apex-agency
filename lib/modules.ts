@@ -84,8 +84,8 @@ export const MODULES: ModuleDef[] = [
     role: "cmo",
     icon: "pen",
     starters: [
-      "Dame 5 posts COMPLETOS listos para copiar y pegar (no ideas). Respeta el mix de estrategia. Cada uno con texto final + creativo (imagen o reel) optimizado para engagement y algoritmo.",
-      "1 Reel de alto potencial: caption copy-paste + guion segundo a segundo + qué filmar yo mismo vs diseño. Objetivo: retención y comentarios.",
+      "Pack multi-red: 1 post Facebook (texto largo), 1 Instagram (estético + mensaje directo) y 1 TikTok (reel o carrusel). Misma oferta, copy distinto por red, listo para copiar.",
+      "2 posts solo Facebook, texto largo de comunidad + imagen de apoyo. No captions cortos de IG.",
       "Página de ventas completa alineada a mi oferta/avatar: gancho, dolores, solución, objeciones, cierre con urgencia. Lista para publicar.",
     ],
   },

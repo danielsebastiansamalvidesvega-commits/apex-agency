@@ -495,12 +495,19 @@ export function ChatPanel({ moduleId, role, title, subtitle, starters }: Props) 
               </p>
               {moduleId === "copy" && (
                 <p className="mt-2 text-xs leading-relaxed text-violet-200/90">
-                  Aquí no solo hay ideas: usa los botones de abajo para{" "}
+                  Cada pieza sale etiquetada por red:{" "}
                   <strong className="font-semibold text-violet-100">
-                    posts completos listos para copiar
+                    Facebook (texto largo)
                   </strong>
-                  , con creativo (imagen o reel) pensado para el algoritmo y el
-                  engagement.
+                  ,{" "}
+                  <strong className="font-semibold text-violet-100">
+                    Instagram (estético + mensaje directo)
+                  </strong>
+                  ,{" "}
+                  <strong className="font-semibold text-violet-100">
+                    TikTok (reels / carrusel)
+                  </strong>
+                  . Usa los botones de abajo: listo para copiar + creativo nativo.
                 </p>
               )}
               {activeHandoffs.length > 0 && (
@@ -571,7 +578,7 @@ export function ChatPanel({ moduleId, role, title, subtitle, starters }: Props) 
                             className="inline-flex items-center gap-1.5 rounded-full border border-violet-400/35 bg-violet-400/15 px-3 py-1.5 text-[11px] font-semibold text-violet-100 transition hover:border-violet-300/50 hover:bg-violet-400/25 active:scale-[0.98] sm:text-xs"
                           >
                             <Wand2 className="h-3.5 w-3.5" />
-                            Post completo listo para copiar
+                            Expandir por red (FB / IG / TikTok)
                           </button>
                         )}
                         <button
@@ -693,7 +700,7 @@ export function ChatPanel({ moduleId, role, title, subtitle, starters }: Props) 
           {moduleId === "copy" && (
             <div className="mb-2.5">
               <p className="mb-1.5 text-[10px] font-medium uppercase tracking-wider text-zinc-500">
-                Posts listos para copiar · creativo + algoritmo
+                Por red · FB texto largo · IG estético · TikTok reels
               </p>
               <div className="flex gap-1.5 overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                 {COPY_ACTIONS.map((action) => {
@@ -766,12 +773,16 @@ export function ChatPanel({ moduleId, role, title, subtitle, starters }: Props) 
 
 function copyActionIcon(id: string) {
   switch (id) {
-    case "reel":
+    case "tiktok":
       return Clapperboard;
-    case "carrusel":
+    case "instagram":
       return Images;
+    case "facebook":
+      return FileText;
     case "oferta":
       return Tag;
+    case "mix-redes":
+      return Sparkles;
     default:
       return FileText;
   }
