@@ -7,15 +7,24 @@ import {
   BookmarkPlus,
   Check,
   ChevronDown,
+  Clapperboard,
+  FileText,
+  Images,
   Loader2,
   Send,
   Sparkles,
   Square,
+  Tag,
   Trash2,
+  Wand2,
   X,
 } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  COPY_ACTIONS,
+  expandToFullPostsPrompt,
+} from "@/lib/copy-actions";
 import {
   formatHandoffsForPrompt,
   HANDOFF_TARGETS,
@@ -484,6 +493,16 @@ export function ChatPanel({ moduleId, role, title, subtitle, starters }: Props) 
                 de otros módulos (ej. estrategia → copy) para mantener
                 coherencia.
               </p>
+              {moduleId === "copy" && (
+                <p className="mt-2 text-xs leading-relaxed text-violet-200/90">
+                  Aquí no solo hay ideas: usa los botones de abajo para{" "}
+                  <strong className="font-semibold text-violet-100">
+                    posts completos listos para copiar
+                  </strong>
+                  , con creativo (imagen o reel) pensado para el algoritmo y el
+                  engagement.
+                </p>
+              )}
               {activeHandoffs.length > 0 && (
                 <p className="mt-2 text-xs text-emerald-300/80">
                   Hay {activeHandoffs.length} decisión
@@ -539,10 +558,22 @@ export function ChatPanel({ moduleId, role, title, subtitle, starters }: Props) 
                     <SimpleMarkdown content={text || "…"} />
                   </div>
 
-                  {/* Usar en… handoff controls */}
+                  {/* Acciones de copy + handoffs */}
                   {text.trim().length > 40 && !busy && (
                     <div className="relative mt-3 border-t border-white/5 pt-3">
                       <div className="flex flex-wrap items-center gap-2">
+                        {moduleId === "copy" && (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              void runStarter(expandToFullPostsPrompt(text))
+                            }
+                            className="inline-flex items-center gap-1.5 rounded-full border border-violet-400/35 bg-violet-400/15 px-3 py-1.5 text-[11px] font-semibold text-violet-100 transition hover:border-violet-300/50 hover:bg-violet-400/25 active:scale-[0.98] sm:text-xs"
+                          >
+                            <Wand2 className="h-3.5 w-3.5" />
+                            Post completo listo para copiar
+                          </button>
+                        )}
                         <button
                           type="button"
                           onClick={() =>
@@ -657,49 +688,93 @@ export function ChatPanel({ moduleId, role, title, subtitle, starters }: Props) 
         onSubmit={onSubmit}
         className="shrink-0 border-t border-white/10 bg-[#0b0b0f]/98 px-3 py-3 backdrop-blur sm:px-5 sm:py-4"
       >
-        <div className="mx-auto flex max-w-3xl items-end gap-2">
-          <textarea
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
-                void onSubmit(e);
-              }
-            }}
-            rows={1}
-            placeholder={
-              activeHandoffs.length
-                ? "Pregunta alineada a tu estrategia activa…"
-                : "Escribe tu mensaje…"
-            }
-            className="max-h-32 min-h-[48px] flex-1 resize-none rounded-2xl border border-white/10 bg-white/5 px-3.5 py-3 text-base text-white outline-none transition placeholder:text-zinc-600 focus:border-amber-400/40 focus:ring-2 focus:ring-amber-400/20 sm:min-h-[52px] sm:px-4 sm:text-sm"
-          />
-          {busy ? (
-            <button
-              type="button"
-              onClick={() => stop()}
-              className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-white/15 bg-white/10 text-white active:scale-95 sm:h-[52px] sm:w-auto sm:gap-2 sm:px-4 sm:text-sm sm:font-medium"
-              aria-label="Detener"
-            >
-              <Square className="h-4 w-4" />
-              <span className="hidden sm:inline">Stop</span>
-            </button>
-          ) : (
-            <button
-              type="submit"
-              disabled={!input.trim() || !hydrated}
-              className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-amber-400 text-black transition active:scale-95 hover:bg-amber-300 disabled:cursor-not-allowed disabled:opacity-40 sm:h-[52px] sm:w-auto sm:gap-2 sm:px-4 sm:text-sm sm:font-semibold"
-              aria-label="Enviar"
-            >
-              <Send className="h-4 w-4" />
-              <span className="hidden sm:inline">Enviar</span>
-            </button>
+        <div className="mx-auto max-w-3xl">
+          {/* Botones fijos de Copy: posts listos para redes */}
+          {moduleId === "copy" && (
+            <div className="mb-2.5">
+              <p className="mb-1.5 text-[10px] font-medium uppercase tracking-wider text-zinc-500">
+                Posts listos para copiar · creativo + algoritmo
+              </p>
+              <div className="flex gap-1.5 overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                {COPY_ACTIONS.map((action) => {
+                  const Icon = copyActionIcon(action.id);
+                  return (
+                    <button
+                      key={action.id}
+                      type="button"
+                      disabled={busy || !hydrated}
+                      onClick={() => void runStarter(action.prompt)}
+                      className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-violet-400/30 bg-violet-400/10 px-3 py-1.5 text-[11px] font-medium text-violet-100 transition hover:border-violet-300/50 hover:bg-violet-400/20 active:scale-[0.98] disabled:opacity-40 sm:text-xs"
+                    >
+                      <Icon className="h-3.5 w-3.5" />
+                      <span className="sm:hidden">{action.shortLabel}</span>
+                      <span className="hidden sm:inline">{action.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
           )}
+
+          <div className="flex items-end gap-2">
+            <textarea
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  void onSubmit(e);
+                }
+              }}
+              rows={1}
+              placeholder={
+                moduleId === "copy"
+                  ? "Pide un post, reel o sales page… o usa los botones de arriba"
+                  : activeHandoffs.length
+                    ? "Pregunta alineada a tu estrategia activa…"
+                    : "Escribe tu mensaje…"
+              }
+              className="max-h-32 min-h-[48px] flex-1 resize-none rounded-2xl border border-white/10 bg-white/5 px-3.5 py-3 text-base text-white outline-none transition placeholder:text-zinc-600 focus:border-amber-400/40 focus:ring-2 focus:ring-amber-400/20 sm:min-h-[52px] sm:px-4 sm:text-sm"
+            />
+            {busy ? (
+              <button
+                type="button"
+                onClick={() => stop()}
+                className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-white/15 bg-white/10 text-white active:scale-95 sm:h-[52px] sm:w-auto sm:gap-2 sm:px-4 sm:text-sm sm:font-medium"
+                aria-label="Detener"
+              >
+                <Square className="h-4 w-4" />
+                <span className="hidden sm:inline">Stop</span>
+              </button>
+            ) : (
+              <button
+                type="submit"
+                disabled={!input.trim() || !hydrated}
+                className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-amber-400 text-black transition active:scale-95 hover:bg-amber-300 disabled:cursor-not-allowed disabled:opacity-40 sm:h-[52px] sm:w-auto sm:gap-2 sm:px-4 sm:text-sm sm:font-semibold"
+                aria-label="Enviar"
+              >
+                <Send className="h-4 w-4" />
+                <span className="hidden sm:inline">Enviar</span>
+              </button>
+            )}
+          </div>
         </div>
       </form>
     </div>
   );
+}
+
+function copyActionIcon(id: string) {
+  switch (id) {
+    case "reel":
+      return Clapperboard;
+    case "carrusel":
+      return Images;
+    case "oferta":
+      return Tag;
+    default:
+      return FileText;
+  }
 }
 
 /** Módulos relacionados más comunes según el origen (atajos visuales) */

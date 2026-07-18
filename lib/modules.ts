@@ -80,13 +80,13 @@ export const MODULES: ModuleDef[] = [
     label: "Copy & textos",
     short: "Copy",
     description:
-      "Páginas de venta, posts, ganchos y mensajes listos para publicar.",
+      "Posts listos para copiar-pegar, reels, sales pages y creativos que enganchan el algoritmo.",
     role: "cmo",
     icon: "pen",
     starters: [
-      "Con la estrategia activa (mix y pilares), escribe una página de ventas alineada al 100%: gancho, 3 dolores, solución, 3 objeciones y cierre con urgencia.",
-      "Respeta el mix de contenidos de la estrategia. Dame un lote de posts Facebook con la misma proporción (si no hay mix, pregunta 1 cosa o asume y márcalo). Cada gancho ≤ 4 líneas y resultado concreto.",
-      "Dame las 5 objeciones más comunes de mi avatar/oferta activa, y una respuesta corta y directa para cada una.",
+      "Dame 5 posts COMPLETOS listos para copiar y pegar (no ideas). Respeta el mix de estrategia. Cada uno con texto final + creativo (imagen o reel) optimizado para engagement y algoritmo.",
+      "1 Reel de alto potencial: caption copy-paste + guion segundo a segundo + qué filmar yo mismo vs diseño. Objetivo: retención y comentarios.",
+      "Página de ventas completa alineada a mi oferta/avatar: gancho, dolores, solución, objeciones, cierre con urgencia. Lista para publicar.",
     ],
   },
   {
