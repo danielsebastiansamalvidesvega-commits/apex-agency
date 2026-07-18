@@ -3,15 +3,30 @@
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
 import {
+  ArrowRightLeft,
   BookmarkPlus,
+  Check,
+  ChevronDown,
   Loader2,
   Send,
   Sparkles,
   Square,
   Trash2,
+  X,
 } from "lucide-react";
+import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  formatHandoffsForPrompt,
+  HANDOFF_TARGETS,
+  lsAddHandoff,
+  lsListHandoffs,
+  lsRemoveHandoff,
+  moduleLabel,
+  type Handoff,
+} from "@/lib/handoffs";
 import type { ModuleId, RoleMode } from "@/lib/modules";
+import { MODULES } from "@/lib/modules";
 import { SimpleMarkdown } from "./markdown";
 
 type Props = {
@@ -29,6 +44,15 @@ function textFromMessage(m: UIMessage) {
     .join("\n");
 }
 
+function titleFromContent(content: string, from: string) {
+  const firstLine = content
+    .split("\n")
+    .map((l) => l.replace(/^#+\s*/, "").trim())
+    .find((l) => l.length > 8);
+  const base = (firstLine || content).replace(/\s+/g, " ").slice(0, 72);
+  return base || `Desde ${moduleLabel(from)}`;
+}
+
 export function ChatPanel({ moduleId, role, title, subtitle, starters }: Props) {
   const [input, setInput] = useState("");
   const [projectName, setProjectName] = useState<string | null>(null);
@@ -37,12 +61,63 @@ export function ChatPanel({ moduleId, role, title, subtitle, starters }: Props) 
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [hydrated, setHydrated] = useState(false);
   const [savedFlash, setSavedFlash] = useState(false);
+  const [activeHandoffs, setActiveHandoffs] = useState<Handoff[]>([]);
+  const [handoffPickerFor, setHandoffPickerFor] = useState<string | null>(null);
+  const [handoffSaving, setHandoffSaving] = useState<string | null>(null);
+  const [handoffToast, setHandoffToast] = useState<{
+    label: string;
+    href: string;
+  } | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
-  const contextRef = useRef({ role, moduleId, projectContext: "" });
+  const contextRef = useRef({
+    role,
+    moduleId,
+    projectContext: "",
+    handoffContext: "",
+  });
   const lastSavedCount = useRef(0);
 
+  const refreshHandoffs = useCallback(
+    async (pid?: string | null) => {
+      const local = lsListHandoffs(moduleId);
+      let remote: Handoff[] = [];
+      try {
+        const qs = new URLSearchParams({ toModule: moduleId });
+        if (pid) qs.set("projectId", pid);
+        const res = await fetch(`/api/handoffs?${qs}`);
+        if (res.ok) {
+          const data = await res.json();
+          remote = (data.handoffs || []) as Handoff[];
+        }
+      } catch {
+        /* offline / table missing */
+      }
+
+      // Merge by id, prefer remote
+      const map = new Map<string, Handoff>();
+      for (const h of local) map.set(h.id, h);
+      for (const h of remote) map.set(h.id, h);
+      const merged = Array.from(map.values()).sort((a, b) =>
+        (b.created_at || "").localeCompare(a.created_at || ""),
+      );
+      setActiveHandoffs(merged);
+
+      const ctx = formatHandoffsForPrompt(merged, moduleId);
+      contextRef.current = {
+        ...contextRef.current,
+        handoffContext: ctx,
+      };
+    },
+    [moduleId],
+  );
+
   useEffect(() => {
-    contextRef.current = { role, moduleId, projectContext };
+    contextRef.current = {
+      ...contextRef.current,
+      role,
+      moduleId,
+      projectContext,
+    };
   }, [role, moduleId, projectContext]);
 
   const transport = useMemo(
@@ -97,6 +172,12 @@ export function ChatPanel({ moduleId, role, title, subtitle, starters }: Props) 
         setProjectId(activeId);
         setProjectName(name);
         setProjectContext(ctx);
+        contextRef.current = {
+          ...contextRef.current,
+          projectContext: ctx,
+        };
+
+        await refreshHandoffs(activeId);
 
         const qs = new URLSearchParams({ moduleId });
         if (activeId) qs.set("projectId", activeId);
@@ -126,7 +207,7 @@ export function ChatPanel({ moduleId, role, title, subtitle, starters }: Props) 
     return () => {
       cancelled = true;
     };
-  }, [moduleId, setMessages]);
+  }, [moduleId, setMessages, refreshHandoffs]);
 
   useEffect(() => {
     if (!conversationId || !hydrated) return;
@@ -163,6 +244,16 @@ export function ChatPanel({ moduleId, role, title, subtitle, starters }: Props) 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, status]);
+
+  // Close picker on outside click (simple)
+  useEffect(() => {
+    if (!handoffPickerFor) return;
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setHandoffPickerFor(null);
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [handoffPickerFor]);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -212,6 +303,71 @@ export function ChatPanel({ moduleId, role, title, subtitle, starters }: Props) 
     }
   }
 
+  async function sendHandoff(content: string, toModule: ModuleId, msgId: string) {
+    if (!content.trim()) return;
+    setHandoffSaving(`${msgId}:${toModule}`);
+    const handoffTitle = titleFromContent(content, moduleId);
+
+    // Always persist locally so coherence works even without the SQL table
+    lsAddHandoff({
+      from_module: moduleId,
+      to_module: toModule,
+      title: handoffTitle,
+      content: content.slice(0, 12000),
+      project_id: projectId,
+    });
+
+    try {
+      const res = await fetch("/api/handoffs", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fromModule: moduleId,
+          toModule,
+          title: handoffTitle,
+          content: content.slice(0, 12000),
+          projectId,
+        }),
+      });
+      if (!res.ok) {
+        // localStorage already saved — still OK
+      }
+    } catch {
+      /* local fallback is enough */
+    }
+
+    setHandoffPickerFor(null);
+    setHandoffSaving(null);
+    const dest = moduleLabel(toModule);
+    setHandoffToast({
+      label: `Listo: se usará en ${dest}`,
+      href: moduleHref(toModule),
+    });
+    setTimeout(() => setHandoffToast(null), 4000);
+  }
+
+  async function dismissHandoff(id: string) {
+    lsRemoveHandoff(id);
+    setActiveHandoffs((prev) => prev.filter((h) => h.id !== id));
+    try {
+      await fetch(`/api/handoffs?id=${encodeURIComponent(id)}`, {
+        method: "DELETE",
+      });
+    } catch {
+      /* ignore */
+    }
+    // refresh context for next messages
+    const remaining = activeHandoffs.filter((h) => h.id !== id);
+    contextRef.current = {
+      ...contextRef.current,
+      handoffContext: formatHandoffsForPrompt(remaining, moduleId),
+    };
+  }
+
+  const handoffTargets = HANDOFF_TARGETS.filter((t) => t.id !== moduleId);
+  const moduleHref = (id: ModuleId) =>
+    MODULES.find((m) => m.id === id)?.href || "/app";
+
   return (
     <div className="flex h-full min-h-0 flex-col">
       <header className="shrink-0 border-b border-white/10 px-3 py-3 sm:px-5 sm:py-4">
@@ -225,6 +381,14 @@ export function ChatPanel({ moduleId, role, title, subtitle, starters }: Props) 
               {projectName && (
                 <span className="max-w-[10rem] truncate rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] text-zinc-400 sm:max-w-none sm:text-[11px]">
                   {projectName}
+                </span>
+              )}
+              {activeHandoffs.length > 0 && (
+                <span className="inline-flex items-center gap-1 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-2 py-0.5 text-[10px] font-medium text-emerald-300 sm:text-[11px]">
+                  <ArrowRightLeft className="h-3 w-3" />
+                  {activeHandoffs.length} decisión
+                  {activeHandoffs.length > 1 ? "es" : ""} activa
+                  {activeHandoffs.length > 1 ? "s" : ""}
                 </span>
               )}
             </div>
@@ -260,6 +424,49 @@ export function ChatPanel({ moduleId, role, title, subtitle, starters }: Props) 
         </div>
       </header>
 
+      {/* Banner: decisiones activas transferidas a este módulo */}
+      {activeHandoffs.length > 0 && hydrated && (
+        <div className="shrink-0 border-b border-emerald-500/20 bg-gradient-to-r from-emerald-500/10 via-emerald-500/5 to-transparent px-3 py-2.5 sm:px-5">
+          <div className="mx-auto max-w-3xl">
+            <p className="mb-2 text-[11px] font-medium uppercase tracking-wider text-emerald-300/90">
+              Contexto de otros módulos (la IA lo respeta)
+            </p>
+            <div className="flex flex-col gap-2">
+              {activeHandoffs.slice(0, 3).map((h) => (
+                <div
+                  key={h.id}
+                  className="group flex items-start gap-2 rounded-xl border border-emerald-400/20 bg-black/20 px-3 py-2"
+                >
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-1.5 text-[11px]">
+                      <span className="font-medium text-emerald-200">
+                        {h.title || "Idea transferida"}
+                      </span>
+                      <span className="text-zinc-500">·</span>
+                      <span className="text-zinc-400">
+                        desde {moduleLabel(h.from_module)}
+                      </span>
+                    </div>
+                    <p className="mt-0.5 line-clamp-2 text-[12px] leading-snug text-zinc-400">
+                      {h.content.slice(0, 180)}
+                      {h.content.length > 180 ? "…" : ""}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => void dismissHandoff(h.id)}
+                    title="Dejar de usar esta idea"
+                    className="shrink-0 rounded-lg p-1.5 text-zinc-500 transition hover:bg-white/10 hover:text-zinc-200"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 py-4 sm:px-5 sm:py-5">
         {!hydrated ? (
           <div className="flex items-center justify-center gap-2 py-16 text-sm text-zinc-500">
@@ -270,9 +477,23 @@ export function ChatPanel({ moduleId, role, title, subtitle, starters }: Props) 
           <div className="mx-auto max-w-3xl">
             <div className="mb-4 rounded-2xl border border-white/10 bg-gradient-to-br from-amber-400/10 to-transparent p-4 sm:mb-6 sm:p-6">
               <p className="text-sm leading-relaxed text-zinc-300">
-                Conversación privada. APEX usa tu proyecto y memoria para
-                responder con contexto — no empiezas de cero cada vez.
+                Conversación privada. APEX usa tu proyecto, memoria y{" "}
+                <span className="text-emerald-300/90">
+                  decisiones transferidas
+                </span>{" "}
+                de otros módulos (ej. estrategia → copy) para mantener
+                coherencia.
               </p>
+              {activeHandoffs.length > 0 && (
+                <p className="mt-2 text-xs text-emerald-300/80">
+                  Hay {activeHandoffs.length} decisión
+                  {activeHandoffs.length > 1 ? "es" : ""} activa
+                  {activeHandoffs.length > 1 ? "s" : ""} de{" "}
+                  {moduleLabel(activeHandoffs[0].from_module)}
+                  {activeHandoffs.length > 1 ? " y más" : ""}. Tus ideas de
+                  contenido/ads respetarán ese plan.
+                </p>
+              )}
             </div>
             {starters.length > 0 && (
               <div className="grid gap-2">
@@ -305,6 +526,7 @@ export function ChatPanel({ moduleId, role, title, subtitle, starters }: Props) 
                   </div>
                 );
               }
+              const pickerOpen = handoffPickerFor === m.id;
               return (
                 <div
                   key={m.id}
@@ -316,6 +538,72 @@ export function ChatPanel({ moduleId, role, title, subtitle, starters }: Props) 
                   <div className="text-[13px] sm:text-[15px]">
                     <SimpleMarkdown content={text || "…"} />
                   </div>
+
+                  {/* Usar en… handoff controls */}
+                  {text.trim().length > 40 && !busy && (
+                    <div className="relative mt-3 border-t border-white/5 pt-3">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setHandoffPickerFor(pickerOpen ? null : m.id)
+                          }
+                          className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/25 bg-amber-400/10 px-3 py-1.5 text-[11px] font-medium text-amber-200 transition hover:border-amber-400/50 hover:bg-amber-400/15 active:scale-[0.98] sm:text-xs"
+                        >
+                          <ArrowRightLeft className="h-3.5 w-3.5" />
+                          Usar esta idea en…
+                          <ChevronDown
+                            className={`h-3.5 w-3.5 transition ${pickerOpen ? "rotate-180" : ""}`}
+                          />
+                        </button>
+                        {/* Quick chips for top related modules */}
+                        {quickTargets(moduleId).map((t) => (
+                          <button
+                            key={t.id}
+                            type="button"
+                            disabled={handoffSaving === `${m.id}:${t.id}`}
+                            onClick={() => void sendHandoff(text, t.id, m.id)}
+                            className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 px-2.5 py-1.5 text-[11px] text-zinc-300 transition hover:border-emerald-400/40 hover:bg-emerald-400/10 hover:text-emerald-200 disabled:opacity-50 sm:text-xs"
+                          >
+                            {handoffSaving === `${m.id}:${t.id}` ? (
+                              <Loader2 className="h-3 w-3 animate-spin" />
+                            ) : null}
+                            {t.label}
+                          </button>
+                        ))}
+                      </div>
+
+                      {pickerOpen && (
+                        <div className="absolute left-0 right-0 z-20 mt-2 max-h-64 overflow-y-auto rounded-2xl border border-white/15 bg-[#121218] p-2 shadow-2xl shadow-black/50 ring-1 ring-amber-400/10 sm:left-0 sm:right-auto sm:min-w-[280px]">
+                          <p className="px-2 pb-1.5 pt-1 text-[10px] font-medium uppercase tracking-wider text-zinc-500">
+                            ¿En qué apartado quieres usar esta respuesta?
+                          </p>
+                          <div className="grid gap-0.5">
+                            {handoffTargets.map((t) => (
+                              <button
+                                key={t.id}
+                                type="button"
+                                disabled={!!handoffSaving}
+                                onClick={() =>
+                                  void sendHandoff(text, t.id, m.id)
+                                }
+                                className="flex items-center justify-between gap-3 rounded-xl px-3 py-2.5 text-left text-sm text-zinc-200 transition hover:bg-amber-400/10 hover:text-amber-100 disabled:opacity-50"
+                              >
+                                <span className="font-medium">{t.label}</span>
+                                {handoffSaving === `${m.id}:${t.id}` ? (
+                                  <Loader2 className="h-3.5 w-3.5 animate-spin text-amber-300" />
+                                ) : (
+                                  <span className="text-[11px] text-zinc-500">
+                                    → /app/{t.id === "consejo" ? "consejo" : t.id}
+                                  </span>
+                                )}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               );
             })}
@@ -329,6 +617,21 @@ export function ChatPanel({ moduleId, role, title, subtitle, starters }: Props) 
           </div>
         )}
       </div>
+
+      {handoffToast && (
+        <div className="pointer-events-none fixed bottom-24 left-1/2 z-50 -translate-x-1/2 sm:bottom-28">
+          <div className="pointer-events-auto flex items-center gap-2 rounded-2xl border border-emerald-400/30 bg-[#0f1410] px-4 py-2.5 text-sm text-emerald-100 shadow-xl shadow-black/40">
+            <Check className="h-4 w-4 shrink-0 text-emerald-400" />
+            <span>{handoffToast.label}</span>
+            <Link
+              href={handoffToast.href}
+              className="ml-1 shrink-0 font-semibold text-amber-300 underline-offset-2 hover:underline"
+            >
+              Ir →
+            </Link>
+          </div>
+        </div>
+      )}
 
       {error && (
         <div className="shrink-0 border-t border-red-500/30 bg-red-500/10 px-3 py-2.5 text-sm text-red-200 sm:px-5 sm:py-3">
@@ -365,7 +668,11 @@ export function ChatPanel({ moduleId, role, title, subtitle, starters }: Props) 
               }
             }}
             rows={1}
-            placeholder="Escribe tu mensaje…"
+            placeholder={
+              activeHandoffs.length
+                ? "Pregunta alineada a tu estrategia activa…"
+                : "Escribe tu mensaje…"
+            }
             className="max-h-32 min-h-[48px] flex-1 resize-none rounded-2xl border border-white/10 bg-white/5 px-3.5 py-3 text-base text-white outline-none transition placeholder:text-zinc-600 focus:border-amber-400/40 focus:ring-2 focus:ring-amber-400/20 sm:min-h-[52px] sm:px-4 sm:text-sm"
           />
           {busy ? (
@@ -393,6 +700,25 @@ export function ChatPanel({ moduleId, role, title, subtitle, starters }: Props) 
       </form>
     </div>
   );
+}
+
+/** Módulos relacionados más comunes según el origen (atajos visuales) */
+function quickTargets(from: ModuleId): { id: ModuleId; label: string }[] {
+  const map: Partial<Record<ModuleId, ModuleId[]>> = {
+    estrategia: ["copy", "ads", "tech"],
+    copy: ["ads", "estrategia", "code"],
+    ads: ["copy", "estrategia", "tech"],
+    tech: ["code", "estrategia", "ads"],
+    code: ["tech", "copy", "estrategia"],
+    consejo: ["estrategia", "copy", "ads", "tech"],
+  };
+  const ids = (map[from] || ["estrategia", "copy", "ads"]).filter(
+    (id) => id !== from,
+  );
+  return ids.slice(0, 3).map((id) => ({
+    id,
+    label: moduleLabel(id),
+  }));
 }
 
 function roleLabel(role: RoleMode) {

@@ -2,8 +2,6 @@ import type { ModuleId, RoleMode } from "./modules";
 
 /**
  * Compact system prompt — sent on every request (cost-sensitive).
- * Sales ecosystem details live in UI starters + lib/sales-ecosystem.ts
- * (only used when the user asks for those flows, not every turn).
  */
 export const AGENCY_CORE = `Eres APEX: CMO + CTO + Lead Full-Stack senior (15+ años). Operador, no chatbot genérico.
 
@@ -16,7 +14,10 @@ Reglas:
 - Código: listo para producción, breve. Copy/ads: variantes A/B si pedidas.
 - Sé conciso: evita secciones vacías; solo el formato que aporte valor.
 - Si el usuario pide ecosistema de ventas, avatar real, mercado, oferta/producto, sales page, objeciones o posts FB: entrega piezas separadas, específicas y listo-para-usar (no genéricas).
-- "Producto" puede ser digital, un servicio o un producto físico. Pregunta o infiere el tipo; no asumas solo digital. Adapta entrega, logística, pricing y copy al tipo de oferta.`;
+- "Producto"/oferta puede ser digital, servicio o producto físico. Adapta entrega, logística, pricing y copy al tipo.
+- COHERENCIA ENTRE MÓDULOS (crítico): si hay DECISIONES ACTIVAS o CONTEXTO TRANSFERIDO desde otro apartado (estrategia, copy, ads, etc.), síguelo de forma estricta. No inventes otra estrategia en paralelo.
+- Si la estrategia define un mix (ej. 70% X / 20% Y / 10% Z), al generar posts, anuncios o piezas de copy respeta ESA proporción (no solo ideas del 70%).
+- Extiende y opera la estrategia existente; si algo no cuadra, dilo y ofrece ajuste — no la ignores.`;
 
 const ROLE_LAYERS: Record<RoleMode, string> = {
   agencia: "Modo consejo: unifica CMO+CTO+Lead en una decisión clara.",
@@ -26,15 +27,17 @@ const ROLE_LAYERS: Record<RoleMode, string> = {
 };
 
 const MODULE_LAYERS: Partial<Record<ModuleId, string>> = {
-  consejo: "Enfoque: priorización de negocio+tech.",
-  estrategia: "Enfoque: GTM, ICP, oferta, embudos 30/60/90.",
-  copy: "Enfoque: copy y creativos listos para usar.",
-  ads: "Enfoque: campañas, testing, scaling, KPIs.",
-  tech: "Enfoque: arquitectura y roadmap técnico.",
-  code: "Enfoque: código e implementación.",
+  consejo: "Enfoque: priorización de negocio+tech. Deja decisiones reutilizables por otros módulos.",
+  estrategia:
+    "Enfoque: GTM, ICP, oferta, embudos. Deja mix de contenidos y pilares claros para Copy/Ads.",
+  copy: "Enfoque: copy y creativos. Si hay estrategia/mix activo, respétalo al 100%.",
+  ads: "Enfoque: campañas y creativos alineados a estrategia y avatar activos.",
+  tech: "Enfoque: arquitectura que soporte la oferta y el embudo definidos.",
+  code: "Enfoque: implementar lo decidido en estrategia/tech, no un producto paralelo.",
   proyectos: "Enfoque: deliverables del proyecto activo.",
   dashboard: "Enfoque: resumen ejecutivo y prioridades.",
   memoria: "Enfoque: hechos del usuario.",
+  planes: "Enfoque: planes de suscripción del producto.",
 };
 
 const MAX_PROJECT_CHARS = 800;
@@ -47,7 +50,6 @@ function clip(text: string, max: number) {
   return t.slice(0, max - 1) + "…";
 }
 
-/** Deduplicate near-identical memory lines and cap size. */
 export function compactMemories(
   items: { content: string; kind?: string }[],
 ): string {
@@ -72,6 +74,7 @@ export function buildSystemPrompt(opts: {
   moduleId: ModuleId;
   projectContext?: string | null;
   memoryContext?: string | null;
+  handoffContext?: string | null;
   userName?: string | null;
 }) {
   const parts = [
@@ -90,6 +93,12 @@ export function buildSystemPrompt(opts: {
     );
   }
 
+  if (opts.handoffContext?.trim()) {
+    parts.push(
+      `DECISIONES ACTIVAS / CONTEXTO TRANSFERIDO DESDE OTROS MÓDULOS (fuente de verdad — alinear todo a esto):\n${opts.handoffContext.trim()}`,
+    );
+  }
+
   if (opts.memoryContext?.trim()) {
     parts.push(`Memoria:\n${opts.memoryContext.trim()}`);
   }
@@ -97,10 +106,6 @@ export function buildSystemPrompt(opts: {
   return parts.filter(Boolean).join("\n\n");
 }
 
-/**
- * Keep only recent turns for the model. Full history stays in DB/UI.
- * Cuts input tokens on long chats.
- */
 export function trimMessagesForModel<T extends { role: string }>(
   messages: T[],
   maxMessages = 12,

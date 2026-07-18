@@ -16,6 +16,7 @@ export const config = {
     "/api/deliverables/:path*",
     "/api/conversations/:path*",
     "/api/memories/:path*",
+    "/api/handoffs/:path*",
     "/api/profile/:path*",
     "/api/billing/checkout",
     "/api/billing/portal",

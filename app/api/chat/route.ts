@@ -13,6 +13,7 @@ import type { ModuleId, RoleMode } from "@/lib/modules";
 import { createClient, getAuthUser } from "@/lib/supabase/server";
 import { projectToContext, type Project } from "@/lib/types";
 import { assertCanChat, incrementMessageUsage } from "@/lib/billing";
+import { formatHandoffsForPrompt, type Handoff } from "@/lib/handoffs";
 
 export const maxDuration = 60;
 
@@ -139,11 +140,37 @@ export async function POST(req: Request) {
     });
     const memoryContext = compactMemories(sorted);
 
+    // Handoffs: ideas transferidas desde otros módulos hacia este.
+    // Prefer client handoffContext (localStorage + remoto mergeados en UI);
+    // si no llega, cargar desde Supabase.
+    let handoffContext = "";
+    if (typeof body.handoffContext === "string" && body.handoffContext.trim()) {
+      handoffContext = body.handoffContext.slice(0, 3500);
+    } else {
+      try {
+        const { data: handoffs } = await supabase
+          .from("handoffs")
+          .select("*")
+          .eq("user_id", user.id)
+          .eq("active", true)
+          .or(`to_module.eq.${moduleId},to_module.eq.all`)
+          .order("created_at", { ascending: false })
+          .limit(6);
+        handoffContext = formatHandoffsForPrompt(
+          (handoffs || []) as Handoff[],
+          moduleId,
+        );
+      } catch {
+        /* table may not exist */
+      }
+    }
+
     const system = buildSystemPrompt({
       role,
       moduleId,
       projectContext,
       memoryContext,
+      handoffContext,
       userName: profile?.full_name || user.email || null,
     });
 

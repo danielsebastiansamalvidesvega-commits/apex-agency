@@ -70,8 +70,8 @@ export const MODULES: ModuleDef[] = [
     icon: "target",
     starters: [
       "Analiza el nicho de [tu tema] y créame un avatar de cliente específico: no genérico. Edad aprox, problema exacto, palabras que usaría y qué lo detiene de comprar.",
-      "Analiza el mercado de [tu nicho]. Dime los 5 problemas más urgentes, qué soluciones ya existen y qué les sigue faltando.",
-      "Con base en este problema: [describe el problema], propón 2–3 ofertas posibles (digital, servicio o producto físico) y desarrolla la mejor: qué es, cómo se entrega, precio sugerido y pasos concretos para venderla. Sin teoría de relleno.",
+      "Define un plan de contenidos con mix claro (ej. 70% X / 20% Y / 10% Z), 3–5 pilares y cómo se reutiliza en Copy y Ads. Quiero poder transferirlo a otros módulos.",
+      "Con base en este problema: [describe el problema], propón 2–3 ofertas (digital, servicio o físico) y desarrolla la mejor: entrega, precio y pasos para venderla. Sin relleno.",
     ],
   },
   {
@@ -84,9 +84,9 @@ export const MODULES: ModuleDef[] = [
     role: "cmo",
     icon: "pen",
     starters: [
-      "Escribe una página de ventas para [tu producto]. Incluye: gancho principal, 3 dolores del cliente, cómo mi producto los resuelve, 3 objeciones con respuesta, y un cierre con urgencia.",
-      "Dame las 5 objeciones más comunes antes de comprar [tu producto], y una respuesta corta y directa para cada una.",
-      "Escribe 5 posts para Facebook sobre [tu tema], cada uno con un gancho distinto de máximo 4 líneas. Deben prometer un resultado concreto, no un consejo genérico.",
+      "Con la estrategia activa (mix y pilares), escribe una página de ventas alineada al 100%: gancho, 3 dolores, solución, 3 objeciones y cierre con urgencia.",
+      "Respeta el mix de contenidos de la estrategia. Dame un lote de posts Facebook con la misma proporción (si no hay mix, pregunta 1 cosa o asume y márcalo). Cada gancho ≤ 4 líneas y resultado concreto.",
+      "Dame las 5 objeciones más comunes de mi avatar/oferta activa, y una respuesta corta y directa para cada una.",
     ],
   },
   {
@@ -99,9 +99,9 @@ export const MODULES: ModuleDef[] = [
     role: "cmo",
     icon: "megaphone",
     starters: [
-      "Con este avatar y oferta [resumen], diseña la estructura de campañas Facebook/Meta y 5 ángulos creativos con resultado concreto.",
-      "Plan de testing de creativos para [producto]: hipótesis, variables y criterios de kill/scale.",
-      "Cómo escalar de $50/día a $500/día en Meta sin romper el CPA, alineado a mi página de ventas.",
+      "Usando la estrategia y el mix activos, diseña la estructura de campañas Meta y 5 ángulos creativos que respeten esa proporción de mensajes.",
+      "Plan de testing de creativos alineado a mis pilares de estrategia: hipótesis, variables y criterios de kill/scale.",
+      "Cómo escalar de $50/día a $500/día en Meta sin romper el CPA, coherente con mi oferta y sales page activas.",
     ],
   },
   {

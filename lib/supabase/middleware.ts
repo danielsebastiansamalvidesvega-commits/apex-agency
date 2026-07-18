@@ -47,6 +47,7 @@ export async function updateSession(request: NextRequest) {
     path.startsWith("/api/deliverables") ||
     path.startsWith("/api/conversations") ||
     path.startsWith("/api/memories") ||
+    path.startsWith("/api/handoffs") ||
     path.startsWith("/api/profile") ||
     (path.startsWith("/api/billing") &&
       !path.startsWith("/api/billing/webhook"));
