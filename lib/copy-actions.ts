@@ -100,17 +100,26 @@ REGLAS DE CALIDAD:
 export const COPY_ACTIONS: CopyAction[] = [
   {
     id: "mix-redes",
-    label: "Pack 3 redes",
-    shortLabel: "3 redes",
-    prompt: `Genera un PACK multi-red: exactamente 3 piezas COMPLETAS (no ideas), una por red, mismo ángulo de negocio pero ADAPTADAS al ADN de cada plataforma:
+    label: "Pack 3 de cada red",
+    shortLabel: "3×3 redes",
+    prompt: `Genera un PACK COMPLETO de redes: exactamente 9 PIEZAS listas para copiar (no ideas sueltas):
 
-1) FACEBOOK — post de texto largo (protagonista el copy escrito)
-2) INSTAGRAM — pieza estética "producto terminado" + mensaje directo (feed o carrusel premium)
-3) TIKTOK — reel (o carrusel deslizable si es mejor) con guion visual
+## FACEBOOK — 3 posts
+Texto largo, estilo comunidad. Ángulos distintos entre sí.
+
+## INSTAGRAM — 3 piezas
+Estética "producto terminado", mensaje directo. Mezcla feed / carrusel premium / reel pulido si aporta (mínimo 1 feed o carrusel estético).
+
+## TIKTOK — 3 piezas
+Prioridad reels; si una rinde mejor como carrusel deslizable, indícalo. Ángulos y hooks distintos.
+
+Orden de entrega:
+1–3 Facebook → 4–6 Instagram → 7–9 TikTok
+Cada una con **Red objetivo** clara y formato nativo de ESA red (no copies el mismo texto entre redes).
 
 ${POST_FORMAT_RULES}
 
-Alineado a estrategia/mix/avatar/oferta activos. Misma promesa de fondo, ejecución nativa por red.`,
+Alineado a estrategia/mix/avatar/oferta activos. Si hay mix (ej. 70/20/10), repártelo dentro de cada bloque de 3. Calidad senior; engagement real por algoritmo de cada red.`,
   },
   {
     id: "facebook",

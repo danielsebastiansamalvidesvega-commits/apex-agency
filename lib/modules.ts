@@ -84,7 +84,7 @@ export const MODULES: ModuleDef[] = [
     role: "cmo",
     icon: "pen",
     starters: [
-      "Pack multi-red: 1 post Facebook (texto largo), 1 Instagram (estético + mensaje directo) y 1 TikTok (reel o carrusel). Misma oferta, copy distinto por red, listo para copiar.",
+      "Pack 3 de cada red: 3 Facebook (texto largo) + 3 Instagram (estético) + 3 TikTok (reels). 9 piezas listas para copiar, cada una nativa de su red.",
       "2 posts solo Facebook, texto largo de comunidad + imagen de apoyo. No captions cortos de IG.",
       "Página de ventas completa alineada a mi oferta/avatar: gancho, dolores, solución, objeciones, cierre con urgencia. Lista para publicar.",
     ],
