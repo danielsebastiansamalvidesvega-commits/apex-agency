@@ -7,8 +7,8 @@ import {
   Sparkles,
   Target,
   Users,
-  Zap,
 } from "lucide-react";
+import { Brand } from "@/components/brand";
 
 const pillars = [
   {
@@ -39,7 +39,7 @@ const pillars = [
   {
     icon: Sparkles,
     title: "Proyectos + Memoria",
-    desc: "Tu contexto privado: historial, proyectos y lo que APEX recuerda de ti.",
+    desc: "Tu contexto privado: historial, proyectos y lo que tomatito recuerda de ti.",
   },
 ];
 
@@ -57,15 +57,7 @@ export default function LandingPage() {
       <div className="pointer-events-none absolute inset-0 apex-grid opacity-40" />
 
       <header className="relative z-10 mx-auto flex max-w-6xl items-center justify-between px-4 pb-3 pt-[max(1rem,env(safe-area-inset-top))] sm:px-6 sm:py-5">
-        <div className="flex items-center gap-2.5">
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-amber-300 to-orange-500 text-black shadow-lg shadow-amber-500/25">
-            <Zap className="h-5 w-5 fill-current" />
-          </span>
-          <div>
-            <div className="text-sm font-bold tracking-tight">APEX</div>
-            <div className="text-[11px] text-zinc-500">Agency OS</div>
-          </div>
-        </div>
+        <Brand href="/" tagline="Tu agencia digital" />
         <div className="flex items-center gap-2 sm:gap-3">
           <Link
             href="/login"
@@ -99,7 +91,7 @@ export default function LandingPage() {
             en un solo sistema.
           </h1>
           <p className="mt-5 max-w-2xl text-base leading-relaxed text-zinc-400 sm:mt-6 sm:text-lg">
-            APEX te ayuda a vender mejor, escribir textos, armar anuncios y
+            tomatito te ayuda a vender mejor, escribir textos, armar anuncios y
             tomar decisiones técnicas — con el rigor de una agencia senior, sin
             enredarte.
           </p>
@@ -172,7 +164,7 @@ export default function LandingPage() {
             <div className="grid grid-cols-2 bg-white/5 text-[10px] font-semibold uppercase tracking-wider text-zinc-500 sm:text-xs">
               <div className="px-3 py-2.5 sm:px-5 sm:py-3">Típico</div>
               <div className="px-3 py-2.5 text-amber-400/90 sm:px-5 sm:py-3">
-                APEX
+                tomatito
               </div>
             </div>
             {vs.map((row) => (
@@ -212,7 +204,7 @@ export default function LandingPage() {
       </main>
 
       <footer className="relative z-10 border-t border-white/10 px-4 py-8 text-center text-xs text-zinc-600">
-        APEX Agency OS · CMO + CTO + Lead Full-Stack
+        tomatito 🍅 · Tu agencia digital
       </footer>
     </div>
   );

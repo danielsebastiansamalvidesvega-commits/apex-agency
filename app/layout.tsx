@@ -13,21 +13,20 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "APEX — Agency OS | CMO + CTO + Lead Full-Stack",
+  title: "tomatito 🍅 — Tu agencia digital",
   description:
-    "Agencia digital y equipo técnico senior en un solo sistema. Estrategia, ads, copy, arquitectura y código alineados al crecimiento.",
+    "tomatito: marketing, ventas, ads, arquitectura y código en un solo sistema. Tu equipo digital con IA.",
   keywords: [
     "marketing digital",
     "agencia IA",
-    "CTO",
-    "full-stack",
+    "tomatito",
+    "ventas",
     "growth",
-    "APEX",
   ],
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "APEX",
+    title: "tomatito",
   },
   formatDetection: {
     telephone: false,

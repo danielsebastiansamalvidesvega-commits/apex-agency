@@ -56,7 +56,7 @@ export const MODULES: ModuleDef[] = [
     starters: [
       "Quiero construir un ecosistema de ventas completo para [tu nicho]: avatar de cliente, problema principal, producto digital que lo resuelva, y estructura de contenido para venderlo en Facebook. Dame cada pieza por separado.",
       "Toma todo lo que hemos creado en esta conversación —avatar, investigación, producto, página de ventas, objeciones— y resume el sistema completo en un flujo de 5 pasos que pueda repetir cada vez que lance un producto nuevo.",
-      "Audita en qué sigo perdiendo tiempo (investigación, avatar, sales page, objeciones, posts) y dame el plan de 48h para resolverlo con el sistema APEX.",
+      "Audita en qué sigo perdiendo tiempo (investigación, avatar, sales page, objeciones, posts) y dame el plan de 48h para resolverlo con tomatito.",
     ],
   },
   {
@@ -151,7 +151,7 @@ export const MODULES: ModuleDef[] = [
     label: "Memoria",
     short: "Memoria",
     description:
-      "Lo que APEX recuerda de ti entre sesiones (privado, solo tuyo).",
+      "Lo que tomatito recuerda de ti entre sesiones (privado, solo tuyo).",
     role: "agencia",
     icon: "brain",
     starters: [],

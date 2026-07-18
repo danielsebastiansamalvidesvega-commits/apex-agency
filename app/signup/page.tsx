@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { AuthDivider, GoogleAuthButton } from "@/components/google-auth-button";
-import { CheckCircle2, Loader2, Mail, Zap } from "lucide-react";
+import { CheckCircle2, Loader2, Mail } from "lucide-react";
+import { Brand } from "@/components/brand";
 
 type Phase = "form" | "check-email";
 
@@ -108,7 +109,7 @@ export default function SignupPage() {
           <p className="mt-3 text-sm leading-relaxed text-zinc-400">
             Enviamos un enlace de verificación a{" "}
             <span className="font-medium text-zinc-200">{registeredEmail}</span>.
-            Ábrelo para activar tu cuenta y entrar a APEX.
+            Ábrelo para activar tu cuenta y entrar a tomatito.
           </p>
           <ul className="mt-5 space-y-2 text-sm text-zinc-500">
             <li className="flex gap-2">
@@ -117,7 +118,7 @@ export default function SignupPage() {
             </li>
             <li className="flex gap-2">
               <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-amber-400/80" />
-              El enlace te llevará de vuelta a APEX para activar tu cuenta.
+              El enlace te llevará de vuelta a tomatito para activar tu cuenta.
             </li>
           </ul>
           <Link
@@ -145,15 +146,7 @@ export default function SignupPage() {
     <div className="relative flex min-h-[100dvh] items-center justify-center px-4 py-[max(1rem,env(safe-area-inset-top))] pb-[max(1.5rem,env(safe-area-inset-bottom))]">
       <div className="pointer-events-none absolute inset-0 apex-glow" />
       <div className="relative w-full max-w-md rounded-3xl border border-white/10 bg-[#0c0c10]/95 p-5 shadow-2xl backdrop-blur sm:p-8">
-        <Link href="/" className="inline-flex items-center gap-2">
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-amber-300 to-orange-500 text-black">
-            <Zap className="h-5 w-5 fill-current" />
-          </span>
-          <div>
-            <div className="text-sm font-bold text-white">APEX</div>
-            <div className="text-[11px] text-zinc-500">Tu agencia digital</div>
-          </div>
-        </Link>
+        <Brand href="/" />
 
         <h1 className="mt-5 text-xl font-semibold tracking-tight text-white sm:mt-6 sm:text-2xl">
           Crea tu cuenta

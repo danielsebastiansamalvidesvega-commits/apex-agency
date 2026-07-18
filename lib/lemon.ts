@@ -80,7 +80,7 @@ export async function createLemonCheckout(opts: {
         },
         product_options: {
           redirect_url: opts.redirectUrl,
-          receipt_button_text: "Volver a APEX",
+          receipt_button_text: "Volver a tomatito",
           receipt_link_url: opts.redirectUrl,
         },
       },

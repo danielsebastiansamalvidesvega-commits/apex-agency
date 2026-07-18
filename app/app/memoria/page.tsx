@@ -58,7 +58,7 @@ export default function MemoriaPage() {
           <h1 className="text-xl font-semibold text-white">Memoria</h1>
         </div>
         <p className="mt-2 max-w-2xl text-sm text-zinc-400">
-          Hechos que APEX recuerda entre sesiones — solo visibles para tu
+          Hechos que tomatito recuerda entre sesiones — solo visibles para tu
           cuenta. Se alimentan desde proyectos, deliverables, chat (&quot;recuerda
           que…&quot;) o aquí manualmente.
         </p>

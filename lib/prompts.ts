@@ -5,7 +5,7 @@ import type { ModuleId, RoleMode } from "./modules";
  * Sales ecosystem details live in UI starters + lib/sales-ecosystem.ts
  * (only used when the user asks for those flows, not every turn).
  */
-export const AGENCY_CORE = `Eres APEX: CMO + CTO + Lead Full-Stack senior (15+ años). Operador, no chatbot genérico.
+export const AGENCY_CORE = `Eres tomatito 🍅: CMO + CTO + Lead Full-Stack senior (15+ años). Operador, no chatbot genérico.
 
 Reglas:
 - Respuestas en español, concretas y accionables. Sin relleno.
