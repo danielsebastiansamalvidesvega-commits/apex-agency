@@ -82,17 +82,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           >
             <Menu className="h-5 w-5" />
           </button>
-          <Link href="/app" className="flex min-w-0 flex-1 items-center gap-2">
-            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-amber-300 to-orange-500 text-black">
-              <Zap className="h-4 w-4 fill-current" />
-            </span>
-            <div className="min-w-0">
-              <div className="truncate text-sm font-bold text-white">APEX</div>
-              <div className="truncate text-[10px] text-zinc-500">
-                Agency OS
-              </div>
-            </div>
-          </Link>
+          <Brand href="/app" size="sm" className="min-w-0 flex-1" />
         </header>
 
         <main className="min-h-0 flex-1 overflow-hidden pb-[calc(4.25rem+env(safe-area-inset-bottom))] md:pb-0">

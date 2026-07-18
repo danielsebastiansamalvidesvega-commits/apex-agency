@@ -189,7 +189,7 @@ export default function LandingPage() {
               Empieza hoy. Es simple.
             </h2>
             <p className="mt-3 max-w-xl text-sm text-zinc-400 sm:text-base">
-              Crea tu cuenta, agrega tu proyecto y abre el Consejo. APEX
+              Crea tu cuenta, agrega tu proyecto y abre el Consejo. tomatito
               recuerda tu contexto y guarda tu historial de forma privada.
             </p>
             <Link
