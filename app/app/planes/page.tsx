@@ -98,7 +98,7 @@ function PlanesContent() {
           </p>
         </div>
         <h1 className="mt-1 text-xl font-semibold text-white sm:text-2xl">
-          Elige cómo quieres trabajar con tomatito
+          Elige cómo quieres trabajar con APEX
         </h1>
         <p className="mt-2 max-w-2xl text-sm text-zinc-400">
           Empieza gratis. Mejora cuando necesites más mensajes, anuncios, tech y

@@ -270,7 +270,7 @@ export function ChatPanel({ moduleId, role, title, subtitle, starters }: Props) 
           <div className="mx-auto max-w-3xl">
             <div className="mb-4 rounded-2xl border border-white/10 bg-gradient-to-br from-amber-400/10 to-transparent p-4 sm:mb-6 sm:p-6">
               <p className="text-sm leading-relaxed text-zinc-300">
-                Conversación privada. tomatito usa tu proyecto y memoria para
+                Conversación privada. APEX usa tu proyecto y memoria para
                 responder con contexto — no empiezas de cero cada vez.
               </p>
             </div>
@@ -311,7 +311,7 @@ export function ChatPanel({ moduleId, role, title, subtitle, starters }: Props) 
                   className="rounded-2xl border border-white/10 bg-white/[0.03] px-3.5 py-3.5 sm:px-4 sm:py-4"
                 >
                   <div className="mb-2 text-[10px] font-medium uppercase tracking-wider text-amber-400/80 sm:text-[11px]">
-                    tomatito · {roleLabel(role)}
+                    APEX · {roleLabel(role)}
                   </div>
                   <div className="text-[13px] sm:text-[15px]">
                     <SimpleMarkdown content={text || "…"} />

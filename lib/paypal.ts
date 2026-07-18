@@ -83,7 +83,7 @@ export async function createPayPalSubscription(opts: {
         ? { email_address: opts.email }
         : undefined,
       application_context: {
-        brand_name: "tomatito",
+        brand_name: "APEX Agency OS",
         locale: "es-PE",
         shipping_preference: "NO_SHIPPING",
         user_action: "SUBSCRIBE_NOW",

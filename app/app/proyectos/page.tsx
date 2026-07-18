@@ -137,7 +137,7 @@ export default function ProyectosPage() {
         </h1>
         <p className="mt-1 max-w-2xl text-sm text-zinc-400">
           Workspaces privados por marca o cliente. El proyecto activo se
-          se usa en el chat y alimenta la memoria de tomatito.
+          inyecta en el chat y alimenta la memoria de APEX.
         </p>
       </header>
 
@@ -224,7 +224,7 @@ export default function ProyectosPage() {
             <div className="mt-4 space-y-2">
               {projects.length === 0 && (
                 <p className="rounded-xl border border-dashed border-white/10 px-4 py-8 text-center text-sm text-zinc-500">
-                  Crea tu primer proyecto. tomatito lo recordará en cada sesión.
+                  Crea tu primer proyecto. APEX lo recordará en cada sesión.
                 </p>
               )}
               {projects.map((p) => {

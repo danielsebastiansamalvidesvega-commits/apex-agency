@@ -7,8 +7,7 @@ import { cn } from "@/lib/utils";
 import { ModuleIcon } from "./icons";
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { LogOut } from "lucide-react";
-import { Brand } from "./brand";
+import { LogOut, Zap } from "lucide-react";
 
 type Props = {
   variant?: "desktop" | "mobile";
@@ -67,9 +66,21 @@ export function AppSidebar({ variant = "desktop", onNavigate }: Props) {
       )}
     >
       <div className="border-b border-white/10 px-4 pb-4 pt-[max(1.25rem,env(safe-area-inset-top))]">
-        <div className="pr-10 md:pr-0">
-          <Brand href="/app" onClick={onNavigate} />
-        </div>
+        <Link
+          href="/app"
+          onClick={onNavigate}
+          className="group flex items-center gap-2.5 pr-10 md:pr-0"
+        >
+          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-amber-300 to-orange-500 text-black shadow-lg shadow-amber-500/20">
+            <Zap className="h-5 w-5 fill-current" />
+          </span>
+          <div>
+            <div className="text-sm font-bold tracking-tight text-white group-hover:text-amber-200">
+              APEX
+            </div>
+            <div className="text-[11px] text-zinc-500">Tu agencia digital</div>
+          </div>
+        </Link>
       </div>
 
       <nav className="flex-1 space-y-0.5 overflow-y-auto overscroll-contain px-2 py-3">

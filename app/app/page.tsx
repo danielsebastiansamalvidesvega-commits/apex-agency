@@ -13,7 +13,7 @@ export default function DashboardPage() {
           Tu workspace
         </p>
         <h1 className="mt-1 text-xl font-semibold tracking-tight text-white sm:text-2xl">
-          Bienvenido a tomatito 🍅
+          Bienvenido a APEX
         </h1>
         <p className="mt-2 max-w-2xl text-sm text-zinc-400">
           Marketing, tecnología y código en un solo lugar. Elige un módulo o

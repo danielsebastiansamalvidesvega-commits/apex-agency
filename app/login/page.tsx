@@ -5,8 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, Suspense, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { AuthDivider, GoogleAuthButton } from "@/components/google-auth-button";
-import { Loader2 } from "lucide-react";
-import { Brand } from "@/components/brand";
+import { Loader2, Zap } from "lucide-react";
 
 function LoginForm() {
   const router = useRouter();
@@ -107,7 +106,15 @@ export default function LoginPage() {
     <div className="relative flex min-h-[100dvh] items-center justify-center px-4 py-[max(1rem,env(safe-area-inset-top))] pb-[max(1.5rem,env(safe-area-inset-bottom))]">
       <div className="pointer-events-none absolute inset-0 apex-glow" />
       <div className="relative w-full max-w-md rounded-3xl border border-white/10 bg-[#0c0c10]/95 p-5 shadow-2xl backdrop-blur sm:p-8">
-        <Brand href="/" />
+        <Link href="/" className="inline-flex items-center gap-2">
+          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-amber-300 to-orange-500 text-black">
+            <Zap className="h-5 w-5 fill-current" />
+          </span>
+          <div>
+            <div className="text-sm font-bold text-white">APEX</div>
+            <div className="text-[11px] text-zinc-500">Tu agencia digital</div>
+          </div>
+        </Link>
 
         <h1 className="mt-6 text-2xl font-semibold tracking-tight text-white">
           Bienvenido de nuevo
