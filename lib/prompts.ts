@@ -1,5 +1,9 @@
 import { COPY_MODULE_SYSTEM } from "./copy-actions";
 import type { ModuleId, RoleMode } from "./modules";
+import {
+  LIVE_RESEARCH_SYSTEM,
+  moduleUsesLiveResearch,
+} from "./research-tools";
 
 /**
  * Compact system prompt — sent on every request (cost-sensitive).
@@ -93,6 +97,10 @@ export function buildSystemPrompt(opts: {
 
   if (opts.moduleId === "copy") {
     parts.push(COPY_MODULE_SYSTEM);
+  }
+
+  if (moduleUsesLiveResearch(opts.moduleId)) {
+    parts.push(LIVE_RESEARCH_SYSTEM);
   }
 
   if (opts.userName?.trim()) {

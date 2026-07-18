@@ -1,6 +1,7 @@
 import { xai } from "@ai-sdk/xai";
 import {
   convertToModelMessages,
+  stepCountIs,
   streamText,
   type UIMessage,
 } from "ai";
@@ -14,11 +15,16 @@ import { createClient, getAuthUser } from "@/lib/supabase/server";
 import { projectToContext, type Project } from "@/lib/types";
 import { assertCanChat, incrementMessageUsage } from "@/lib/billing";
 import { formatHandoffsForPrompt, type Handoff } from "@/lib/handoffs";
+import {
+  liveResearchTools,
+  moduleUsesLiveResearch,
+} from "@/lib/research-tools";
 
-export const maxDuration = 60;
+export const maxDuration = 120;
 
 /** Cap assistant verbosity (output tokens). */
 const MAX_OUTPUT_TOKENS = 2500;
+const MAX_OUTPUT_TOKENS_COPY = 4500;
 /** Only last N UI messages go to the model. */
 const MAX_HISTORY_MESSAGES = 12;
 /** Max memories loaded from DB. */
@@ -184,8 +190,13 @@ export async function POST(req: Request) {
 
     // Cheapest text model by default (override with XAI_MODEL on Vercel)
     // Pricing (approx per 1M tokens): build-0.1 $1/$2 · 4.3 $1.25/$2.50 · 4.5 $2/$6
+    // For live research (web/x search) prefer a Responses-capable model.
+    const useResearch = moduleUsesLiveResearch(moduleId);
     const modelId =
-      process.env.XAI_MODEL?.trim() || "grok-build-0.1";
+      (useResearch
+        ? process.env.XAI_MODEL_RESEARCH?.trim() ||
+          process.env.XAI_MODEL?.trim()
+        : process.env.XAI_MODEL?.trim()) || "grok-build-0.1";
 
     // Only some models accept reasoningEffort; grok-build-0.1 rejects it
     const supportsReasoningEffort =
@@ -193,15 +204,33 @@ export async function POST(req: Request) {
       modelId.includes("grok-4.3") ||
       modelId.includes("grok-4.20");
 
+    const maxOut =
+      moduleId === "copy" || moduleId === "ads"
+        ? MAX_OUTPUT_TOKENS_COPY
+        : MAX_OUTPUT_TOKENS;
+
     const result = streamText({
+      // xai() uses Responses API by default (AI SDK 7) — required for tools
       model: xai(modelId),
       system,
       messages: await convertToModelMessages(modelMessages),
-      maxOutputTokens: MAX_OUTPUT_TOKENS,
+      maxOutputTokens: maxOut,
+      ...(useResearch
+        ? {
+            tools: liveResearchTools(),
+            // Allow a few research steps then the final posts
+            stopWhen: stepCountIs(8),
+          }
+        : {}),
       ...(supportsReasoningEffort
         ? {
             providerOptions: {
-              xai: { reasoningEffort: "none" as const },
+              xai: {
+                // low: enough for tool routing without heavy latency
+                reasoningEffort: (useResearch ? "low" : "none") as
+                  | "low"
+                  | "none",
+              },
             },
           }
         : {}),

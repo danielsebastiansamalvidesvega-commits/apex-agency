@@ -95,6 +95,12 @@ REGLAS DE CALIDAD:
 - NUNCA solo ideas: siempre texto/caption listo para copiar + creativo.
 - Si hay mix de estrategia, respétalo al repartir piezas.
 - Senior marketing digital + e-commerce. Español LatAm. Sin relleno.
+
+INVESTIGACIÓN DE TENDENCIAS (obligatoria en packs y lotes de posts):
+- Usa las herramientas web_search y x_search ANTES de escribir el pack.
+- Busca por nicho/oferta: tendencias TikTok, hashtags o temas en alza IG, formatos FB de texto largo que estén funcionando, reportes de Creative Center / insights públicos / blogs de marketing actualizados.
+- Empieza con ## SEÑALES DE TENDENCIA (investigación) separando TikTok / Instagram / Facebook.
+- En cada pieza, indica qué señal o formato actual estás aprovechando (no inventes métricas de la cuenta del usuario).
 `.trim();
 
 export const COPY_ACTIONS: CopyAction[] = [
@@ -119,7 +125,9 @@ Cada una con **Red objetivo** clara y formato nativo de ESA red (no copies el mi
 
 ${POST_FORMAT_RULES}
 
-Alineado a estrategia/mix/avatar/oferta activos. Si hay mix (ej. 70/20/10), repártelo dentro de cada bloque de 3. Calidad senior; engagement real por algoritmo de cada red.`,
+Alineado a estrategia/mix/avatar/oferta activos. Si hay mix (ej. 70/20/10), repártelo dentro de cada bloque de 3.
+
+OBLIGATORIO: primero investiga con web_search (y x_search si ayuda) tendencias y hashtags/temas en alza del nicho para TikTok, Instagram y Facebook; escribe ## SEÑALES DE TENDENCIA; luego las 9 piezas, cada una apoyada en al menos una señal o formato actual. Calidad senior; engagement real por algoritmo de cada red.`,
   },
   {
     id: "facebook",
@@ -198,4 +206,9 @@ IDENTIFICACIÓN POR RED (crítico en cada sugerencia de RRSS):
 - Posts/reels: SIEMPRE texto/caption listo para copiar-pegar + ficha CREATIVO alineada a esa red + por qué engancha su algoritmo.
 - Si hay mix de estrategia (70/20/10), respétalo en el lote.
 - Sales pages, emails y ads: shippables y concretos.
+
+TENDENCIAS / INSIGHTS:
+- Tienes web_search y x_search: úsalas como proxy de Creator Insights / Creative Center / hashtag research cuando generes posts.
+- No tienes login a la cuenta Meta/TikTok del usuario; investiga lo público y actual del nicho y aplícalo.
+- Incluye sección SEÑALES DE TENDENCIA y conecta cada post a una señal real cuando exista.
 `.trim();

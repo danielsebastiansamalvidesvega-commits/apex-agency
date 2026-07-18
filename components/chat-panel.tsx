@@ -507,7 +507,8 @@ export function ChatPanel({ moduleId, role, title, subtitle, starters }: Props) 
                   <strong className="font-semibold text-violet-100">
                     TikTok (reels / carrusel)
                   </strong>
-                  . Usa los botones de abajo: listo para copiar + creativo nativo.
+                  . La IA indaga tendencias/hashtags públicos (web + X) antes de
+                  escribir. Usa los botones: listo para copiar + creativo nativo.
                 </p>
               )}
               {activeHandoffs.length > 0 && (
@@ -700,7 +701,7 @@ export function ChatPanel({ moduleId, role, title, subtitle, starters }: Props) 
           {moduleId === "copy" && (
             <div className="mb-2.5">
               <p className="mb-1.5 text-[10px] font-medium uppercase tracking-wider text-zinc-500">
-                Por red · FB texto largo · IG estético · TikTok reels
+                Por red · tendencias en vivo · FB · IG · TikTok
               </p>
               <div className="flex gap-1.5 overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                 {COPY_ACTIONS.map((action) => {
@@ -782,7 +783,7 @@ function copyActionIcon(id: string) {
     case "oferta":
       return Tag;
     case "mix-redes":
-      return Sparkles;
+      return Sparkles; // Pack 3×3 (FB + IG + TikTok)
     default:
       return FileText;
   }
