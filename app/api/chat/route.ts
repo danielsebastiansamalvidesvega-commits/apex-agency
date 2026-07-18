@@ -24,7 +24,8 @@ export const maxDuration = 120;
 
 /** Cap assistant verbosity (output tokens). */
 const MAX_OUTPUT_TOKENS = 2500;
-const MAX_OUTPUT_TOKENS_COPY = 4500;
+/** Packs multi-red + FB extenso (~450–700 palabras c/u) necesitan más headroom */
+const MAX_OUTPUT_TOKENS_COPY = 8000;
 /** Only last N UI messages go to the model. */
 const MAX_HISTORY_MESSAGES = 12;
 /** Max memories loaded from DB. */
