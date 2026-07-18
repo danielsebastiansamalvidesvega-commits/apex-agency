@@ -6,6 +6,7 @@ import {
   getTodayMessageCount,
 } from "@/lib/billing";
 import { isLemonConfigured } from "@/lib/lemon";
+import { isOwner } from "@/lib/owner";
 import { isPayPalConfigured } from "@/lib/paypal";
 import { PLAN_ORDER, PLANS } from "@/lib/plans";
 
@@ -17,8 +18,17 @@ export async function GET() {
 
   const supabase = await createClient();
   const profile = await getBillingProfile(supabase, user.id);
-  const plan = effectivePlanFromProfile(profile);
+  let plan = effectivePlanFromProfile(profile);
   const used = await getTodayMessageCount(supabase, user.id);
+
+  if (isOwner(user.email, user.id)) {
+    plan = PLANS.agency;
+    // Keep DB in sync so you stay Agency even if env is missing later
+    await supabase
+      .from("profiles")
+      .update({ plan: "agency", plan_status: "active" })
+      .eq("id", user.id);
+  }
 
   const paypal = isPayPalConfigured();
   const lemon = isLemonConfigured();
@@ -27,12 +37,13 @@ export async function GET() {
   return NextResponse.json({
     plan: plan.id,
     planName: plan.name,
-    planStatus: profile.plan_status,
+    planStatus: isOwner(user.email, user.id) ? "active" : profile.plan_status,
     periodEnd: profile.plan_period_end,
     messagesUsedToday: used,
     messagesLimit: plan.messagesPerDay,
     maxProjects: plan.maxProjects,
     modules: plan.modules,
+    isOwner: isOwner(user.email, user.id),
     paymentsConfigured,
     stripeConfigured: paymentsConfigured,
     provider: paypal ? "paypal" : lemon ? "lemon_squeezy" : "none",

@@ -3,10 +3,12 @@ import {
   getPlan,
   planAllowsModule,
   resolveEffectivePlan,
+  PLANS,
   type PlanDef,
   type PlanId,
 } from "./plans";
 import type { ModuleId } from "./modules";
+import { isOwner } from "./owner";
 
 export type BillingProfile = {
   plan: string;
@@ -111,7 +113,26 @@ export async function assertCanChat(
   supabase: SupabaseClient,
   userId: string,
   moduleId: ModuleId,
+  userEmail?: string | null,
 ): Promise<ChatGateResult> {
+  // Owner: full Agency access, no module/message gates
+  if (isOwner(userEmail, userId)) {
+    // Persist so UI/billing status also show Agency
+    void supabase
+      .from("profiles")
+      .update({ plan: "agency", plan_status: "active" })
+      .eq("id", userId)
+      .neq("plan", "agency");
+
+    const used = await getTodayMessageCount(supabase, userId);
+    return {
+      ok: true,
+      plan: PLANS.agency,
+      used,
+      limit: null,
+    };
+  }
+
   const profile = await getBillingProfile(supabase, userId);
   const plan = effectivePlanFromProfile(profile);
   const used = await getTodayMessageCount(supabase, userId);

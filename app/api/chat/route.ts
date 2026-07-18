@@ -86,7 +86,12 @@ export async function POST(req: Request) {
 
     const supabase = await createClient();
 
-    const gate = await assertCanChat(supabase, user.id, moduleId);
+    const gate = await assertCanChat(
+      supabase,
+      user.id,
+      moduleId,
+      user.email,
+    );
     if (!gate.ok) {
       return Response.json(
         {
