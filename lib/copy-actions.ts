@@ -1,235 +1,70 @@
 /**
- * Acciones rápidas de Copy & textos.
- * Cada pieza se etiqueta y escribe para UNA red, con su "ADN" nativo:
- * - Facebook → post de texto largo / comunidad
- * - TikTok → reels (a veces carrusel deslizable)
- * - Instagram → producto terminado, estético, mensaje directo
+ * Acciones Copy — prompts cortos (el ADN de red vive en el system prompt).
+ * Evitar pegar reglas largas en cada mensaje: multiplica el costo de input.
  */
 
 export type CopyAction = {
   id: string;
   label: string;
   shortLabel: string;
-  /** Prompt completo que se envía al chat */
   prompt: string;
+  /** Solo true en botones que valen el gasto de web/x search */
+  liveResearch?: boolean;
 };
 
-/** ADN de cada red — la IA debe respetarlo al 100% */
-export const PLATFORM_DNA = `
-ADN POR RED (OBLIGATORIO — no mezcles estilos entre redes):
-
-### FACEBOOK (posts e historias largas — retención de lectura)
-- Es un sitio de TEXTO EXTENSO: narrativa, valor, historia, opinión, prueba social. El muro premia tiempo de lectura y comentarios, no captions de 5 líneas.
-- LONGITUD MÍNIMA OBLIGATORIA de cada POST de feed:
-  • Mínimo ~450–700 palabras (aprox. el triple de un post “normal” de 150–200).
-  • Prohibido entregar 4–6 o incluso 10 líneas y darlo por listo.
-  • Si el bloque copy-paste tiene menos de ~35–40 líneas con saltos naturales, alarga: falta profundidad.
-- ESTRUCTURA DE RETENCIÓN (siempre):
-  1) Hook de 1–2 líneas (open loop / dolor / contraste).
-  2) Desarrollo en micro-párrafos de 1–3 líneas (fácil de escanear en móvil).
-  3) Historia o ejemplo concreto del avatar (escena, diálogo interno, antes/después).
-  4) 1 insight o lista de valor (errores, pasos, mitos).
-  5) Prueba social o objeción respondida.
-  6) CTA + pregunta que invite a comentar (cierra el open loop).
-- HISTORIAS / STORYTELLING en Facebook (post narrativo o “historia real”):
-  • Mismo mínimo de extensión o más (500–800 palabras si es historia).
-  • Arco: contexto → conflicto → giro → lección → oferta suave o CTA.
-  • Escenas sensoriales, no solo tips abstractos.
-- Creativo: 1 imagen de apoyo o ninguna (el texto manda). No sustituyas el muro de texto por un caption corto de IG.
-- Tono: conversacional, de comunidad / grupo; voz humana, no brochure.
-- CTA: comentar, compartir, “escribe X en comentarios”, link en primer comentario.
-- PROHIBIDO: copy corto tipo Instagram o TikTok etiquetado como Facebook.
-
-### TIKTOK
-- Prioridad: REELS / video vertical (15–45s ideal). A veces carrusel de imágenes deslizables (photo mode).
-- Caption: corto o medio (1–5 líneas + CTA). El peso está en el GUION visual y audio.
-- Hook brutal 0–3s (visual + texto en pantalla). Ritmo rápido, cortes, nativo "UGC", no comercial rígido.
-- Si carrusel TikTok: 5–8 slides con texto grande legible, swipe bait al final.
-- Tono: directo, tendencia, "te lo digo claro", a veces humor o polarización sana.
-- NO escribas un monólogo de 300 palabras de Facebook para TikTok.
-
-### INSTAGRAM
-- Prioridad: "producto terminado" — estética cuidada, feed coherente, mensaje DIRECTO y claro.
-- Feed: caption medio (40–120 palabras), primera línea potente (preview del feed).
-- Carrusel IG: 6–10 slides muy diseñados (como piezas de marca), tipografía limpia, visual premium.
-- Reels IG: más pulidos que TikTok (lighting, composición, branding sutil), igual de enganche en 0–3s.
-- Mensaje: beneficio/resultado en una frase clara; menos wall-of-text, más deseo + prueba + CTA.
-- Creativo: se ve "listo para publicar" (Canva pro, foto de producto, lifestyle editado).
-- NO uses el tono crudo de TikTok ni el ensayo largo de Facebook en el feed de IG.
-`.trim();
-
-const POST_FORMAT_RULES = `
-${PLATFORM_DNA}
-
-FORMATO OBLIGATORIO por cada pieza (no listas de ideas sueltas):
-
-### [RED] · PIEZA [n] — [ángulo / pilar del mix]
-**Red objetivo:** Facebook | Instagram | TikTok  ← UNA sola, sin ambigüedad
-**Formato nativo de esa red:**
-- Si Facebook → Post o historia de texto LARGO de retención (+ imagen de apoyo opcional)
-- Si TikTok → Reel (o Carrusel deslizable si justifica mejor el mensaje)
-- Si Instagram → Feed estético | Carrusel premium | Reel pulido
-**Por qué este formato en ESTA red:** 1 frase (encaja con el ADN de arriba)
-**Objetivo de algoritmo en esa red:** [comentarios · shares · guardados · watch time · perfil · link]
-**Gancho:** primera línea (FB/IG) o 0–3s en pantalla (TikTok/Reel)
-**Si Facebook — meta de retención:** “ver más” + lectura completa; indica ~nº de palabras del copy final
-
-#### TEXTO / CAPTION LISTO PARA COPIAR
-\`\`\`
-[Copy FINAL adaptado 100% a la red elegida.
-- Facebook: texto EXTENSO (mín. ~450–700 palabras; historias 500–800). Micro-párrafos. NUNCA 4–10 líneas. Estructura de retención completa.
-- Instagram: caption nativo IG (línea 1 = preview).
-- TikTok: caption corto + (si es reel) NO sustituye el guion visual.
-]
-\`\`\`
-
-**CTA nativo de la red:** [comentar / compartir / guardar / seguir / link / DM]
-**Hashtags:** solo si la red lo premia en el nicho (IG/TikTok: 3–8; FB: a menudo 0–3)
-
-#### CREATIVO (ajustado a la red)
-**Facebook**
-- 1 imagen de apoyo o gráfica simple (qué debe verse). El post vive del TEXTO LARGO; la imagen no reemplaza la historia.
-
-**TikTok**
-- Si REEL: guion por segundos (0–3 / 3–8 / 8–20 / cierre), texto en pantalla, cortes, si lo filmas tú (UGC) o editas plantilla, mood de audio genérico.
-- Si CARRUSEL deslizable: texto exacto de cada slide + “swipe” final.
-
-**Instagram**
-- Moodboard breve (colores, estilo, “producto terminado”).
-- Feed: descripción de la foto/diseño final.
-- Carrusel: texto EXACTO de cada slide (diseño premium).
-- Reel: guion más estético/branded que TikTok, igual de hook.
-
-**Por qué engancha en ESA red:** 2–3 bullets (según su algoritmo y cultura).
-**Cuándo publicar:** franja sugerida (LatAm si no hay datos).
-
-REGLAS DE CALIDAD:
-- Cada pieza declara UNA red y se escribe SOLO para esa red (longitud, tono, creativo).
-- Prohibido un único copy genérico "para todas las redes".
-- NUNCA solo ideas: siempre texto/caption listo para copiar + creativo.
-- Si hay mix de estrategia, respétalo al repartir piezas.
-- Senior marketing digital + e-commerce. Español LatAm. Sin relleno.
-
-INVESTIGACIÓN DE TENDENCIAS (obligatoria en packs y lotes de posts):
-- Usa las herramientas web_search y x_search ANTES de escribir el pack.
-- Busca por nicho/oferta: tendencias TikTok, hashtags o temas en alza IG, formatos FB de texto largo que estén funcionando, reportes de Creative Center / insights públicos / blogs de marketing actualizados.
-- Empieza con ## SEÑALES DE TENDENCIA (investigación) separando TikTok / Instagram / Facebook.
-- En cada pieza, indica qué señal o formato actual estás aprovechando (no inventes métricas de la cuenta del usuario).
-`.trim();
+/** Formato mínimo en system — no repetir en cada user message */
+export const COPY_MODULE_SYSTEM = `COPY multi-red: piezas listo-para-pegar, 1 red por pieza (nunca copy genérico).
+- FB: texto LARGO retención (~280–400 palabras; historias ~350–500). Prohibido 4–10 líneas. Hook→historia→valor→prueba→CTA+pregunta. Micro-párrafos. Creativo=imagen apoyo.
+- IG: estético "producto terminado", mensaje directo, caption 40–120p o carrusel/reel pulido + brief visual.
+- TikTok: reel (o carrusel), caption corto + guion 0–3s; no muro FB.
+Cada pieza: Red objetivo | texto en bloque copy-paste | creativo 2–4 bullets | CTA. Respeta mix de estrategia si hay. Sin relleno.`;
 
 export const COPY_ACTIONS: CopyAction[] = [
   {
     id: "mix-redes",
     label: "Pack 3 de cada red",
-    shortLabel: "3×3 redes",
-    prompt: `Genera un PACK COMPLETO de redes: exactamente 9 PIEZAS listas para copiar (no ideas sueltas):
-
-## FACEBOOK — 3 posts (EXTENSOS, retención de lectura)
-Cada uno mínimo ~450–700 palabras (historias 500–800). Prohibido posts de 4–10 líneas.
-Estructura: hook → desarrollo → historia/ejemplo → valor → prueba/objeción → CTA + pregunta.
-Ángulos distintos; al menos 1 de los 3 debe ser storytelling narrativo largo.
-
-## INSTAGRAM — 3 piezas
-Estética "producto terminado", mensaje directo. Mezcla feed / carrusel premium / reel pulido si aporta (mínimo 1 feed o carrusel estético).
-
-## TIKTOK — 3 piezas
-Prioridad reels; si una rinde mejor como carrusel deslizable, indícalo. Ángulos y hooks distintos.
-
-Orden de entrega:
-1–3 Facebook → 4–6 Instagram → 7–9 TikTok
-Cada una con **Red objetivo** clara y formato nativo de ESA red (no copies el mismo texto entre redes).
-
-${POST_FORMAT_RULES}
-
-Alineado a estrategia/mix/avatar/oferta activos. Si hay mix (ej. 70/20/10), repártelo dentro de cada bloque de 3.
-
-OBLIGATORIO: primero investiga con web_search (y x_search si ayuda) tendencias y hashtags/temas en alza del nicho para TikTok, Instagram y Facebook; escribe ## SEÑALES DE TENDENCIA; luego las 9 piezas, cada una apoyada en al menos una señal o formato actual. Calidad senior; engagement real por algoritmo de cada red.`,
+    shortLabel: "3×3",
+    prompt: `Pack 9 piezas (listas para pegar), orden FB×3 → IG×3 → TikTok×3. Ángulos distintos. FB largos con estructura de retención. IG estéticos. TikTok reels/guion. Creativo breve por pieza. Alinea a estrategia/mix si existe. Sin investigación web.`,
+  },
+  {
+    id: "mix-tendencias",
+    label: "Pack + tendencias",
+    shortLabel: "3×3+web",
+    liveResearch: true,
+    prompt: `Pack 9 piezas FB×3 IG×3 TikTok×3 listo-pegar. PRIMERO 1 sola web_search del nicho (no x_search salvo imprescindible). Sección breve SEÑALES (máx 6 bullets) y luego las 9 piezas nativas. FB largos retención. Sin relleno.`,
   },
   {
     id: "facebook",
     label: "Post Facebook",
     shortLabel: "Facebook",
-    prompt: `Genera 2 POSTS COMPLETOS solo para FACEBOOK — texto EXTENSO de alta retención (estilo comunidad / muro).
-
-${POST_FORMAT_RULES}
-
-Obligatorio:
-- Red objetivo = Facebook en ambas.
-- Cada post: mínimo ~450–700 palabras (si es historia, 500–800). Si queda corto, reescribe más largo ANTES de entregar.
-- Prohibido captions de 4–10 líneas. Debe invitar a “ver más” y sostener la lectura hasta el CTA.
-- Estructura de retención completa (hook, desarrollo, historia, valor, prueba, CTA+pregunta).
-- Creativo = imagen de apoyo opcional (el texto manda). No lo conviertas en reel de TikTok ni caption de IG.`,
+    prompt: `1 post Facebook EXTENSO listo-pegar (~280–400 palabras; si historia ~350–500). Hook→desarrollo→ejemplo→valor→CTA+pregunta. Creativo imagen 1 línea. No caption corto.`,
   },
   {
     id: "instagram",
     label: "Post Instagram",
     shortLabel: "Instagram",
-    prompt: `Genera 2 PIEZAS COMPLETAS solo para INSTAGRAM: estética de "producto terminado", mensaje directo y claro.
-
-${POST_FORMAT_RULES}
-
-Obligatorio: Red objetivo = Instagram. Puede ser 1 feed + 1 carrusel premium, o 1 feed + 1 reel pulido. Captions nativos IG + brief de diseño/foto final. Nada de muro de texto tipo Facebook ni crudo tipo TikTok.`,
+    prompt: `2 piezas Instagram listo-pegar (feed y/o carrusel/reel pulido). Estética producto terminado + mensaje directo. Caption nativo + creativo breve.`,
   },
   {
     id: "tiktok",
     label: "TikTok / Reel",
     shortLabel: "TikTok",
-    prompt: `Genera 2 PIEZAS COMPLETAS solo para TIKTOK: prioridad reels; si una funciona mejor como carrusel deslizable, indícalo.
-
-${POST_FORMAT_RULES}
-
-Obligatorio: Red objetivo = TikTok. Caption corto + guion visual por segundos (o slides). Estilo nativo UGC/ritmo rápido. No uses copy largo de Facebook ni estética de catálogo IG sin adaptación.`,
+    prompt: `2 reels TikTok listo-pegar: caption corto + guion por segundos + creativo. Hooks distintos. Estilo UGC.`,
   },
   {
     id: "oferta",
     label: "Oferta 3 redes",
     shortLabel: "Oferta",
-    prompt: `Genera 1 OFERTA / e-commerce en 3 versiones nativas (misma oferta, distinta ejecución):
-
-1) Facebook — post texto largo de conversión + prueba social
-2) Instagram — feed o carrusel "producto terminado" con mensaje directo y CTA
-3) TikTok — reel demo/unboxing/resultado (guion + caption corto)
-
-${POST_FORMAT_RULES}
-
-Dolor → promesa → prueba → oferta → CTA. Si hay precio en memoria/proyecto, úsalo; si no, SUPUESTOS marcados.`,
+    prompt: `Misma oferta en 3 versiones: 1 FB largo conversión, 1 IG estético, 1 TikTok reel. Listo-pegar + creativo breve cada una.`,
   },
 ];
 
-/** Convierte una respuesta previa (ideas) en posts completos por red */
 export function expandToFullPostsPrompt(sourceText: string): string {
-  const clip = sourceText.trim().slice(0, 4500);
-  return `Toma este contenido (ideas, outline o borrador) y conviértelo en PIEZAS COMPLETAS listas para copiar, ETIQUETADAS por red y escritas con el ADN nativo de cada una.
+  const clip = sourceText.trim().slice(0, 1200);
+  return `Convierte esto en máx 3 piezas listo-pegar (1 FB largo, 1 IG, 1 TikTok). Sin ideas sueltas.
 
-CONTENIDO BASE:
+BASE:
 """
 ${clip}
-"""
-
-${POST_FORMAT_RULES}
-
-Si el base no especifica red, entrega al menos:
-- 1 versión Facebook (texto largo)
-- 1 versión Instagram (estética + mensaje directo)
-- 1 versión TikTok (reel o carrusel deslizable)
-Sin copiar el mismo texto en las tres. Si ya eran varias ideas, máx 5 piezas, cada una con **Red objetivo** clara.`;
+"""`;
 }
-
-export const COPY_MODULE_SYSTEM = `
-Módulo COPY & TEXTOS — senior de marketing digital y e-commerce multi-red.
-
-IDENTIFICACIÓN POR RED (crítico en cada sugerencia de RRSS):
-- Cada pieza debe llevar **Red objetivo: Facebook | Instagram | TikTok** y el copy/creativo debe nacer de ese ADN:
-  • Facebook = posts e historias MUY largos (mín. ~450–700 palabras; nunca 4–10 líneas), retención de lectura, comunidad, narrativa.
-  • TikTok = reels (a veces imágenes deslizables), ritmo, hook 0–3s.
-  • Instagram = "producto terminado", estético, mensaje directo y caption nativo (no ensayo FB).
-- Nunca un único copy genérico "para todas las redes". Si el usuario no elige red, ofrece variantes por red o pregunta cuál priorizar.
-- Posts/reels: SIEMPRE texto/caption listo para copiar-pegar + ficha CREATIVO alineada a esa red + por qué engancha su algoritmo.
-- Si hay mix de estrategia (70/20/10), respétalo en el lote.
-- Sales pages, emails y ads: shippables y concretos.
-
-TENDENCIAS / INSIGHTS:
-- Tienes web_search y x_search: úsalas como proxy de Creator Insights / Creative Center / hashtag research cuando generes posts.
-- No tienes login a la cuenta Meta/TikTok del usuario; investiga lo público y actual del nicho y aplícalo.
-- Incluye sección SEÑALES DE TENDENCIA y conecta cada post a una señal real cuando exista.
-`.trim();

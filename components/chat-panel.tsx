@@ -83,6 +83,7 @@ export function ChatPanel({ moduleId, role, title, subtitle, starters }: Props) 
     moduleId,
     projectContext: "",
     handoffContext: "",
+    liveResearch: false,
   });
   const lastSavedCount = useRef(0);
 
@@ -269,13 +270,24 @@ export function ChatPanel({ moduleId, role, title, subtitle, starters }: Props) 
     const text = input.trim();
     if (!text || busy || !hydrated) return;
     setInput("");
+    // Mensajes normales: sin research (ahorro de créditos)
+    contextRef.current = { ...contextRef.current, liveResearch: false };
     await sendMessage({ text });
   }
 
-  async function runStarter(text: string) {
+  async function runStarter(text: string, opts?: { liveResearch?: boolean }) {
     if (busy || !hydrated) return;
     setInput("");
-    await sendMessage({ text });
+    contextRef.current = {
+      ...contextRef.current,
+      liveResearch: opts?.liveResearch === true,
+    };
+    try {
+      await sendMessage({ text });
+    } finally {
+      // Reset para el siguiente mensaje
+      contextRef.current = { ...contextRef.current, liveResearch: false };
+    }
   }
 
   const clearChat = useCallback(async () => {
@@ -701,18 +713,27 @@ export function ChatPanel({ moduleId, role, title, subtitle, starters }: Props) 
           {moduleId === "copy" && (
             <div className="mb-2.5">
               <p className="mb-1.5 text-[10px] font-medium uppercase tracking-wider text-zinc-500">
-                Por red · tendencias en vivo · FB · IG · TikTok
+                Packs baratos · “+ tendencias” gasta más créditos
               </p>
               <div className="flex gap-1.5 overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                 {COPY_ACTIONS.map((action) => {
                   const Icon = copyActionIcon(action.id);
+                  const costly = action.liveResearch === true;
                   return (
                     <button
                       key={action.id}
                       type="button"
                       disabled={busy || !hydrated}
-                      onClick={() => void runStarter(action.prompt)}
-                      className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-violet-400/30 bg-violet-400/10 px-3 py-1.5 text-[11px] font-medium text-violet-100 transition hover:border-violet-300/50 hover:bg-violet-400/20 active:scale-[0.98] disabled:opacity-40 sm:text-xs"
+                      onClick={() =>
+                        void runStarter(action.prompt, {
+                          liveResearch: action.liveResearch,
+                        })
+                      }
+                      className={
+                        costly
+                          ? "inline-flex shrink-0 items-center gap-1.5 rounded-full border border-amber-400/40 bg-amber-400/10 px-3 py-1.5 text-[11px] font-medium text-amber-100 transition hover:bg-amber-400/20 active:scale-[0.98] disabled:opacity-40 sm:text-xs"
+                          : "inline-flex shrink-0 items-center gap-1.5 rounded-full border border-violet-400/30 bg-violet-400/10 px-3 py-1.5 text-[11px] font-medium text-violet-100 transition hover:border-violet-300/50 hover:bg-violet-400/20 active:scale-[0.98] disabled:opacity-40 sm:text-xs"
+                      }
                     >
                       <Icon className="h-3.5 w-3.5" />
                       <span className="sm:hidden">{action.shortLabel}</span>
@@ -783,7 +804,9 @@ function copyActionIcon(id: string) {
     case "oferta":
       return Tag;
     case "mix-redes":
-      return Sparkles; // Pack 3×3 (FB + IG + TikTok)
+      return Sparkles;
+    case "mix-tendencias":
+      return Wand2;
     default:
       return FileText;
   }

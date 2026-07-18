@@ -8,6 +8,7 @@ import {
 import {
   buildSystemPrompt,
   compactMemories,
+  MAX_MSG_CHARS_FOR_MODEL,
   trimMessagesForModel,
 } from "@/lib/prompts";
 import type { ModuleId, RoleMode } from "@/lib/modules";
@@ -15,21 +16,16 @@ import { createClient, getAuthUser } from "@/lib/supabase/server";
 import { projectToContext, type Project } from "@/lib/types";
 import { assertCanChat, incrementMessageUsage } from "@/lib/billing";
 import { formatHandoffsForPrompt, type Handoff } from "@/lib/handoffs";
-import {
-  liveResearchTools,
-  moduleUsesLiveResearch,
-} from "@/lib/research-tools";
+import { liveResearchTools } from "@/lib/research-tools";
 
-export const maxDuration = 120;
+export const maxDuration = 60;
 
-/** Cap assistant verbosity (output tokens). */
-const MAX_OUTPUT_TOKENS = 2500;
-/** Packs multi-red + FB extenso (~450–700 palabras c/u) necesitan más headroom */
-const MAX_OUTPUT_TOKENS_COPY = 8000;
-/** Only last N UI messages go to the model. */
-const MAX_HISTORY_MESSAGES = 12;
-/** Max memories loaded from DB. */
-const MEMORY_FETCH_LIMIT = 20;
+/** Caps agresivos de costo */
+const MAX_OUTPUT_TOKENS = 1200;
+const MAX_OUTPUT_TOKENS_COPY = 3200;
+const MAX_HISTORY_MESSAGES = 6;
+const MEMORY_FETCH_LIMIT = 10;
+const MAX_HANDOFF_BODY_CLIENT = 900;
 
 function publicErrorMessage(error: unknown): string {
   const msg =
@@ -67,6 +63,25 @@ function publicErrorMessage(error: unknown): string {
   return msg;
 }
 
+/** Recorta partes de texto de UIMessage para no reenviar posts de 5k chars en el historial. */
+function clipUiMessagesForModel(messages: UIMessage[]): UIMessage[] {
+  return messages.map((m) => {
+    if (!m.parts?.length) return m;
+    const parts = m.parts.map((p) => {
+      if (p.type === "text" && typeof p.text === "string" && p.text.length > MAX_MSG_CHARS_FOR_MODEL) {
+        return {
+          ...p,
+          text:
+            p.text.slice(0, MAX_MSG_CHARS_FOR_MODEL) +
+            "\n…[historial recortado por costo]",
+        };
+      }
+      return p;
+    });
+    return { ...m, parts };
+  });
+}
+
 export async function POST(req: Request) {
   const user = await getAuthUser();
   if (!user) {
@@ -90,6 +105,8 @@ export async function POST(req: Request) {
     const role = (body.role as RoleMode) || "agencia";
     const moduleId = (body.moduleId as ModuleId) || "consejo";
     let projectContext = (body.projectContext as string) || "";
+    // Research solo si el cliente lo pide (botón "Pack + tendencias")
+    const liveResearch = body.liveResearch === true;
 
     const supabase = await createClient();
 
@@ -113,7 +130,6 @@ export async function POST(req: Request) {
       );
     }
 
-    // Count this request toward the daily quota
     try {
       await incrementMessageUsage(supabase, user.id);
     } catch {
@@ -136,7 +152,6 @@ export async function POST(req: Request) {
       if (project) projectContext = projectToContext(project as Project);
     }
 
-    // Prefer project-linked memories, then general — compact before inject
     const { data: memories } = await supabase
       .from("memories")
       .select("content, kind, project_id, updated_at")
@@ -152,12 +167,9 @@ export async function POST(req: Request) {
     });
     const memoryContext = compactMemories(sorted);
 
-    // Handoffs: ideas transferidas desde otros módulos hacia este.
-    // Prefer client handoffContext (localStorage + remoto mergeados en UI);
-    // si no llega, cargar desde Supabase.
     let handoffContext = "";
     if (typeof body.handoffContext === "string" && body.handoffContext.trim()) {
-      handoffContext = body.handoffContext.slice(0, 3500);
+      handoffContext = body.handoffContext.slice(0, MAX_HANDOFF_BODY_CLIENT);
     } else {
       try {
         const { data: handoffs } = await supabase
@@ -167,7 +179,7 @@ export async function POST(req: Request) {
           .eq("active", true)
           .or(`to_module.eq.${moduleId},to_module.eq.all`)
           .order("created_at", { ascending: false })
-          .limit(6);
+          .limit(2);
         handoffContext = formatHandoffsForPrompt(
           (handoffs || []) as Handoff[],
           moduleId,
@@ -184,22 +196,20 @@ export async function POST(req: Request) {
       memoryContext,
       handoffContext,
       userName: profile?.full_name || user.email || null,
+      liveResearch,
     });
 
-    // Full thread stays in the UI/DB; model only sees a recent window
-    const modelMessages = trimMessagesForModel(messages, MAX_HISTORY_MESSAGES);
+    const modelMessages = clipUiMessagesForModel(
+      trimMessagesForModel(messages, MAX_HISTORY_MESSAGES),
+    );
 
-    // Cheapest text model by default (override with XAI_MODEL on Vercel)
-    // Pricing (approx per 1M tokens): build-0.1 $1/$2 · 4.3 $1.25/$2.50 · 4.5 $2/$6
-    // For live research (web/x search) prefer a Responses-capable model.
-    const useResearch = moduleUsesLiveResearch(moduleId);
+    // Modelo barato por defecto; research puede usar otro si está configurado
     const modelId =
-      (useResearch
+      (liveResearch
         ? process.env.XAI_MODEL_RESEARCH?.trim() ||
           process.env.XAI_MODEL?.trim()
         : process.env.XAI_MODEL?.trim()) || "grok-build-0.1";
 
-    // Only some models accept reasoningEffort; grok-build-0.1 rejects it
     const supportsReasoningEffort =
       modelId.includes("grok-4.5") ||
       modelId.includes("grok-4.3") ||
@@ -211,27 +221,21 @@ export async function POST(req: Request) {
         : MAX_OUTPUT_TOKENS;
 
     const result = streamText({
-      // xai() uses Responses API by default (AI SDK 7) — required for tools
       model: xai(modelId),
       system,
       messages: await convertToModelMessages(modelMessages),
       maxOutputTokens: maxOut,
-      ...(useResearch
+      ...(liveResearch
         ? {
             tools: liveResearchTools(),
-            // Allow a few research steps then the final posts
-            stopWhen: stepCountIs(8),
+            // 1–2 tool steps + respuesta final (antes 8: muy caro)
+            stopWhen: stepCountIs(3),
           }
         : {}),
       ...(supportsReasoningEffort
         ? {
             providerOptions: {
-              xai: {
-                // low: enough for tool routing without heavy latency
-                reasoningEffort: (useResearch ? "low" : "none") as
-                  | "low"
-                  | "none",
-              },
+              xai: { reasoningEffort: "none" as const },
             },
           }
         : {}),

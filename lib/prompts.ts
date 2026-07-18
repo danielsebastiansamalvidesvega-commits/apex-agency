@@ -1,60 +1,40 @@
 import { COPY_MODULE_SYSTEM } from "./copy-actions";
 import type { ModuleId, RoleMode } from "./modules";
-import {
-  LIVE_RESEARCH_SYSTEM,
-  moduleUsesLiveResearch,
-} from "./research-tools";
+import { LIVE_RESEARCH_SYSTEM } from "./research-tools";
 
 /**
- * Compact system prompt — sent on every request (cost-sensitive).
+ * System prompt compacto — cada token aquí se paga en TODA request.
  */
-export const AGENCY_CORE = `Eres APEX: CMO + CTO + Lead Full-Stack senior (15+ años). Operador, no chatbot genérico.
-
-Reglas:
-- Respuestas en español, concretas y accionables. Sin relleno.
-- Usa contexto/memoria del usuario; no re-preguntes lo que ya sabes.
-- Si falta info crítica: 1–3 preguntas O avanza con SUPUESTOS marcados.
-- Prioriza: decisión → plan → métricas → próximo paso (48h).
-- Marketing: CAC/LTV/ROAS cuando aplique. Tech: trade-offs y shippability.
-- Código: listo para producción, breve. Copy/ads: variantes A/B si pedidas.
-- En Copy & redes: posts COMPLETOS listos para copiar-pegar, cada uno identificado por red (Facebook = texto largo; TikTok = reels/carrusel; Instagram = estético "producto terminado" + mensaje directo). Nunca un copy genérico multi-red.
-- Sé conciso: evita secciones vacías; solo el formato que aporte valor.
-- Si el usuario pide ecosistema de ventas, avatar real, mercado, oferta/producto, sales page, objeciones o posts FB: entrega piezas separadas, específicas y listo-para-usar (no genéricas).
-- "Producto"/oferta puede ser digital, servicio o producto físico. Adapta entrega, logística, pricing y copy al tipo.
-- COHERENCIA ENTRE MÓDULOS (crítico): si hay DECISIONES ACTIVAS o CONTEXTO TRANSFERIDO desde otro apartado (estrategia, copy, ads, etc.), síguelo de forma estricta. No inventes otra estrategia en paralelo.
-- Si la estrategia define un mix (ej. 70% X / 20% Y / 10% Z), al generar posts, anuncios o piezas de copy respeta ESA proporción (no solo ideas del 70%).
-- Extiende y opera la estrategia existente; si algo no cuadra, dilo y ofrece ajuste — no la ignores.`;
+export const AGENCY_CORE = `Eres APEX: CMO+CTO+Lead senior. Español, concreto, sin relleno.
+- Usa memoria/proyecto; 1–3 preguntas o SUPUESTOS si falta info.
+- Decisión → plan → métricas → próximo paso 48h.
+- Coherencia: si hay DECISIONES ACTIVAS de otro módulo, síguelas (mix 70/20/10 etc.).
+- Producto: digital, servicio o físico. Copy/código shippables.`;
 
 const ROLE_LAYERS: Record<RoleMode, string> = {
-  agencia: "Modo consejo: unifica CMO+CTO+Lead en una decisión clara.",
-  cmo: "Modo CMO: growth, mensaje, canales, creativos, unit economics.",
-  cto: "Modo CTO: arquitectura, stack, riesgos, data, time-to-value.",
-  lead: "Modo Lead Dev: implementación, código, specs shippables.",
+  agencia: "Modo consejo: una decisión clara CMO+CTO+Lead.",
+  cmo: "Modo CMO: growth, mensaje, canales, unit economics.",
+  cto: "Modo CTO: arquitectura, stack, riesgos, TTV.",
+  lead: "Modo Lead: código/specs shippables.",
 };
 
 const MODULE_LAYERS: Partial<Record<ModuleId, string>> = {
-  consejo: "Enfoque: priorización de negocio+tech. Deja decisiones reutilizables por otros módulos.",
-  estrategia:
-    "Enfoque: GTM, ICP, oferta, embudos. Deja mix de contenidos y pilares claros para Copy/Ads.",
-  copy: `Enfoque COPY senior multi-red (marketing digital + e-commerce):
-- Cada pieza de RRSS lleva Red objetivo (Facebook | Instagram | TikTok) y se escribe con su ADN:
-  FB posts/historias EXTENSOS (mín. ~450–700 palabras, retención “ver más”; nunca 4–10 líneas); TikTok reel/carrusel; IG producto terminado + mensaje directo.
-- NUNCA solo ideas ni un copy genérico para todas las redes.
-- Siempre: texto/caption copy-paste + creativo nativo de ESA red + por qué engancha su algoritmo.
-- Si hay estrategia/mix activo, respétalo al 100% en el lote.
-- Sales pages, emails y ads: shippables, sin relleno.`,
-  ads: "Enfoque: campañas y creativos alineados a estrategia y avatar activos.",
-  tech: "Enfoque: arquitectura que soporte la oferta y el embudo definidos.",
-  code: "Enfoque: implementar lo decidido en estrategia/tech, no un producto paralelo.",
-  proyectos: "Enfoque: deliverables del proyecto activo.",
-  dashboard: "Enfoque: resumen ejecutivo y prioridades.",
-  memoria: "Enfoque: hechos del usuario.",
-  planes: "Enfoque: planes de suscripción del producto.",
+  consejo: "Prioriza negocio+tech; deja decisiones reutilizables.",
+  estrategia: "GTM, ICP, oferta, embudo; mix claro para Copy/Ads.",
+  copy: "Ver reglas COPY abajo.",
+  ads: "Campañas/creativos alineados a estrategia activa. Sé breve.",
+  tech: "Arquitectura que soporte oferta/embudo. Trade-offs cortos.",
+  code: "Implementa lo decidido; código listo, no essays.",
+  proyectos: "Deliverables del proyecto activo.",
+  dashboard: "Resumen ejecutivo corto.",
+  memoria: "Hechos del usuario.",
+  planes: "Planes de suscripción.",
 };
 
-const MAX_PROJECT_CHARS = 800;
-const MAX_MEMORY_ITEMS = 12;
-const MAX_MEMORY_CHARS = 1200;
+const MAX_PROJECT_CHARS = 400;
+const MAX_MEMORY_ITEMS = 6;
+const MAX_MEMORY_CHARS = 500;
+const MAX_HANDOFF_IN_SYSTEM = 900;
 
 function clip(text: string, max: number) {
   const t = text.trim();
@@ -71,10 +51,10 @@ export function compactMemories(
   for (const m of items) {
     const content = (m.content || "").trim();
     if (!content) continue;
-    const key = content.toLowerCase().replace(/\s+/g, " ").slice(0, 80);
+    const key = content.toLowerCase().replace(/\s+/g, " ").slice(0, 60);
     if (seen.has(key)) continue;
     seen.add(key);
-    lines.push(`- ${clip(content, 160)}`);
+    lines.push(`- ${clip(content, 100)}`);
     if (lines.length >= MAX_MEMORY_ITEMS) break;
   }
 
@@ -88,6 +68,7 @@ export function buildSystemPrompt(opts: {
   memoryContext?: string | null;
   handoffContext?: string | null;
   userName?: string | null;
+  liveResearch?: boolean;
 }) {
   const parts = [
     AGENCY_CORE,
@@ -99,23 +80,21 @@ export function buildSystemPrompt(opts: {
     parts.push(COPY_MODULE_SYSTEM);
   }
 
-  if (moduleUsesLiveResearch(opts.moduleId)) {
+  if (opts.liveResearch) {
     parts.push(LIVE_RESEARCH_SYSTEM);
   }
 
   if (opts.userName?.trim()) {
-    parts.push(`Usuario: ${opts.userName.trim()}.`);
+    parts.push(`Usuario: ${clip(opts.userName, 40)}.`);
   }
 
   if (opts.projectContext?.trim()) {
-    parts.push(
-      `Proyecto activo:\n${clip(opts.projectContext, MAX_PROJECT_CHARS)}`,
-    );
+    parts.push(`Proyecto:\n${clip(opts.projectContext, MAX_PROJECT_CHARS)}`);
   }
 
   if (opts.handoffContext?.trim()) {
     parts.push(
-      `DECISIONES ACTIVAS / CONTEXTO TRANSFERIDO DESDE OTROS MÓDULOS (fuente de verdad — alinear todo a esto):\n${opts.handoffContext.trim()}`,
+      `DECISIONES ACTIVAS:\n${clip(opts.handoffContext, MAX_HANDOFF_IN_SYSTEM)}`,
     );
   }
 
@@ -126,10 +105,15 @@ export function buildSystemPrompt(opts: {
   return parts.filter(Boolean).join("\n\n");
 }
 
-export function trimMessagesForModel<T extends { role: string }>(
-  messages: T[],
-  maxMessages = 12,
-): T[] {
-  if (messages.length <= maxMessages) return messages;
-  return messages.slice(-maxMessages);
+/** Recorta historial y recorta cada mensaje (historial con posts largos quema créditos). */
+export function trimMessagesForModel<
+  T extends { role: string; content?: unknown; parts?: unknown },
+>(messages: T[], maxMessages = 6): T[] {
+  const slice = messages.length <= maxMessages
+    ? messages
+    : messages.slice(-maxMessages);
+  return slice;
 }
+
+/** Máx chars de texto por mensaje de historial hacia el modelo */
+export const MAX_MSG_CHARS_FOR_MODEL = 1400;

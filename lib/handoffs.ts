@@ -22,8 +22,9 @@ export function moduleLabel(id: string): string {
   return MODULES.find((m) => m.id === id)?.label || id;
 }
 
-const MAX_HANDOFF_CHARS = 3500;
-const MAX_HANDOFFS_IN_PROMPT = 4;
+const MAX_HANDOFF_CHARS = 900;
+const MAX_HANDOFFS_IN_PROMPT = 2;
+const MAX_BODY_PER_HANDOFF = 400;
 
 export function formatHandoffsForPrompt(
   items: Handoff[],
@@ -34,8 +35,8 @@ export function formatHandoffsForPrompt(
   const lines = items.slice(0, MAX_HANDOFFS_IN_PROMPT).map((h, i) => {
     const from = moduleLabel(h.from_module);
     const title = h.title?.trim() || `Idea ${i + 1}`;
-    const body = h.content.trim().slice(0, 1200);
-    return `### ${title}\nOrigen: ${from} → destino: ${moduleLabel(h.to_module) || currentModule}\n${body}`;
+    const body = h.content.trim().slice(0, MAX_BODY_PER_HANDOFF);
+    return `### ${title}\nOrigen: ${from} → ${moduleLabel(h.to_module) || currentModule}\n${body}`;
   });
 
   const text = lines.join("\n\n");
@@ -44,7 +45,6 @@ export function formatHandoffsForPrompt(
     : text;
 }
 
-/** localStorage fallback when API/table not ready */
 const LS_KEY = "apex_handoffs_v1";
 
 export function lsListHandoffs(toModule?: string): Handoff[] {
@@ -81,8 +81,6 @@ export function lsAddHandoff(
 }
 
 export function lsRemoveHandoff(id: string) {
-  const all = lsListHandoffs().filter((h) => h.id !== id);
-  // Also need inactive ones - re-read raw
   try {
     const raw = JSON.parse(localStorage.getItem(LS_KEY) || "[]") as Handoff[];
     localStorage.setItem(
@@ -90,7 +88,7 @@ export function lsRemoveHandoff(id: string) {
       JSON.stringify(raw.filter((h) => h.id !== id)),
     );
   } catch {
-    localStorage.setItem(LS_KEY, JSON.stringify(all));
+    /* ignore */
   }
 }
 
