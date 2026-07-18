@@ -54,8 +54,8 @@ export const MODULES: ModuleDef[] = [
     role: "agencia",
     icon: "users",
     starters: [
-      "Quiero construir un ecosistema de ventas completo para [tu nicho]: avatar de cliente, problema principal, producto digital que lo resuelva, y estructura de contenido para venderlo en Facebook. Dame cada pieza por separado.",
-      "Toma todo lo que hemos creado en esta conversación —avatar, investigación, producto, página de ventas, objeciones— y resume el sistema completo en un flujo de 5 pasos que pueda repetir cada vez que lance un producto nuevo.",
+      "Quiero construir un ecosistema de ventas completo para [tu nicho]: avatar de cliente, problema principal, oferta que lo resuelva (puede ser producto digital, servicio o producto físico), y estructura de contenido para venderlo en Facebook. Dame cada pieza por separado.",
+      "Toma todo lo que hemos creado en esta conversación —avatar, investigación, oferta, página de ventas, objeciones— y resume el sistema completo en un flujo de 5 pasos que pueda repetir cada vez que lance una oferta nueva.",
       "Audita en qué sigo perdiendo tiempo (investigación, avatar, sales page, objeciones, posts) y dame el plan de 48h para resolverlo con el sistema APEX.",
     ],
   },
@@ -71,7 +71,7 @@ export const MODULES: ModuleDef[] = [
     starters: [
       "Analiza el nicho de [tu tema] y créame un avatar de cliente específico: no genérico. Edad aprox, problema exacto, palabras que usaría y qué lo detiene de comprar.",
       "Analiza el mercado de [tu nicho]. Dime los 5 problemas más urgentes, qué soluciones ya existen y qué les sigue faltando.",
-      "Con base en este problema: [describe el problema], dame la estructura completa de una herramienta/producto simple que lo resuelva en menos de 30 minutos. Pasos concretos, sin teoría.",
+      "Con base en este problema: [describe el problema], propón 2–3 ofertas posibles (digital, servicio o producto físico) y desarrolla la mejor: qué es, cómo se entrega, precio sugerido y pasos concretos para venderla. Sin teoría de relleno.",
     ],
   },
   {
@@ -115,7 +115,7 @@ export const MODULES: ModuleDef[] = [
     icon: "cpu",
     starters: [
       "Propón el stack mínimo para landing de ventas + captura de leads + tracking de Meta para [producto].",
-      "Arquitectura de una herramienta digital simple que resuelva [problema] en <30 min de uso.",
+      "Arquitectura o proceso simple para entregar [mi oferta: digital / servicio / físico] de forma escalable (web, citas, envíos, etc. según aplique).",
       "Diseña el data model y eventos de tracking del embudo (view → lead → compra).",
     ],
   },
