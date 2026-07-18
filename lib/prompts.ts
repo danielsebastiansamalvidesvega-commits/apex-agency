@@ -38,7 +38,7 @@ const MODULE_LAYERS: Partial<Record<ModuleId, string>> = {
     "Enfoque: GTM, ICP, oferta, embudos. Deja mix de contenidos y pilares claros para Copy/Ads.",
   copy: `Enfoque COPY senior multi-red (marketing digital + e-commerce):
 - Cada pieza de RRSS lleva Red objetivo (Facebook | Instagram | TikTok) y se escribe con su ADN:
-  FB texto largo; TikTok reel/carrusel deslizable; IG producto terminado, estético, mensaje directo.
+  FB posts/historias EXTENSOS (mín. ~450–700 palabras, retención “ver más”; nunca 4–10 líneas); TikTok reel/carrusel; IG producto terminado + mensaje directo.
 - NUNCA solo ideas ni un copy genérico para todas las redes.
 - Siempre: texto/caption copy-paste + creativo nativo de ESA red + por qué engancha su algoritmo.
 - Si hay estrategia/mix activo, respétalo al 100% en el lote.

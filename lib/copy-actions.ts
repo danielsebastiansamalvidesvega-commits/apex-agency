@@ -18,14 +18,27 @@ export type CopyAction = {
 export const PLATFORM_DNA = `
 ADN POR RED (OBLIGATORIO — no mezcles estilos entre redes):
 
-### FACEBOOK
-- Es un sitio de POSTS CON TEXTO LARGO: narrativa, valor, historia, opinión, prueba social.
-- Longitud típica: 150–350 palabras (puede ir más si engancha).
-- Párrafos cortos, saltos de línea, a veces pregunta al final para comentarios.
-- Creativo: 1 imagen de apoyo o ninguna (el texto manda). Rara vez "reel primero".
-- Tono: conversacional, de comunidad / grupo; menos "estética de catálogo".
-- CTA: comentar, compartir, link en primer comentario o "escríbeme".
-- NO copies un caption corto de IG y lo pongas en FB.
+### FACEBOOK (posts e historias largas — retención de lectura)
+- Es un sitio de TEXTO EXTENSO: narrativa, valor, historia, opinión, prueba social. El muro premia tiempo de lectura y comentarios, no captions de 5 líneas.
+- LONGITUD MÍNIMA OBLIGATORIA de cada POST de feed:
+  • Mínimo ~450–700 palabras (aprox. el triple de un post “normal” de 150–200).
+  • Prohibido entregar 4–6 o incluso 10 líneas y darlo por listo.
+  • Si el bloque copy-paste tiene menos de ~35–40 líneas con saltos naturales, alarga: falta profundidad.
+- ESTRUCTURA DE RETENCIÓN (siempre):
+  1) Hook de 1–2 líneas (open loop / dolor / contraste).
+  2) Desarrollo en micro-párrafos de 1–3 líneas (fácil de escanear en móvil).
+  3) Historia o ejemplo concreto del avatar (escena, diálogo interno, antes/después).
+  4) 1 insight o lista de valor (errores, pasos, mitos).
+  5) Prueba social o objeción respondida.
+  6) CTA + pregunta que invite a comentar (cierra el open loop).
+- HISTORIAS / STORYTELLING en Facebook (post narrativo o “historia real”):
+  • Mismo mínimo de extensión o más (500–800 palabras si es historia).
+  • Arco: contexto → conflicto → giro → lección → oferta suave o CTA.
+  • Escenas sensoriales, no solo tips abstractos.
+- Creativo: 1 imagen de apoyo o ninguna (el texto manda). No sustituyas el muro de texto por un caption corto de IG.
+- Tono: conversacional, de comunidad / grupo; voz humana, no brochure.
+- CTA: comentar, compartir, “escribe X en comentarios”, link en primer comentario.
+- PROHIBIDO: copy corto tipo Instagram o TikTok etiquetado como Facebook.
 
 ### TIKTOK
 - Prioridad: REELS / video vertical (15–45s ideal). A veces carrusel de imágenes deslizables (photo mode).
@@ -53,17 +66,18 @@ FORMATO OBLIGATORIO por cada pieza (no listas de ideas sueltas):
 ### [RED] · PIEZA [n] — [ángulo / pilar del mix]
 **Red objetivo:** Facebook | Instagram | TikTok  ← UNA sola, sin ambigüedad
 **Formato nativo de esa red:**
-- Si Facebook → Post texto largo (+ imagen de apoyo opcional)
+- Si Facebook → Post o historia de texto LARGO de retención (+ imagen de apoyo opcional)
 - Si TikTok → Reel (o Carrusel deslizable si justifica mejor el mensaje)
 - Si Instagram → Feed estético | Carrusel premium | Reel pulido
 **Por qué este formato en ESTA red:** 1 frase (encaja con el ADN de arriba)
 **Objetivo de algoritmo en esa red:** [comentarios · shares · guardados · watch time · perfil · link]
 **Gancho:** primera línea (FB/IG) o 0–3s en pantalla (TikTok/Reel)
+**Si Facebook — meta de retención:** “ver más” + lectura completa; indica ~nº de palabras del copy final
 
 #### TEXTO / CAPTION LISTO PARA COPIAR
 \`\`\`
 [Copy FINAL adaptado 100% a la red elegida.
-- Facebook: texto largo completo, listo para pegar en el post.
+- Facebook: texto EXTENSO (mín. ~450–700 palabras; historias 500–800). Micro-párrafos. NUNCA 4–10 líneas. Estructura de retención completa.
 - Instagram: caption nativo IG (línea 1 = preview).
 - TikTok: caption corto + (si es reel) NO sustituye el guion visual.
 ]
@@ -74,7 +88,7 @@ FORMATO OBLIGATORIO por cada pieza (no listas de ideas sueltas):
 
 #### CREATIVO (ajustado a la red)
 **Facebook**
-- 1 imagen de apoyo o gráfica simple (qué debe verse). El post vive del texto.
+- 1 imagen de apoyo o gráfica simple (qué debe verse). El post vive del TEXTO LARGO; la imagen no reemplaza la historia.
 
 **TikTok**
 - Si REEL: guion por segundos (0–3 / 3–8 / 8–20 / cierre), texto en pantalla, cortes, si lo filmas tú (UGC) o editas plantilla, mood de audio genérico.
@@ -110,8 +124,10 @@ export const COPY_ACTIONS: CopyAction[] = [
     shortLabel: "3×3 redes",
     prompt: `Genera un PACK COMPLETO de redes: exactamente 9 PIEZAS listas para copiar (no ideas sueltas):
 
-## FACEBOOK — 3 posts
-Texto largo, estilo comunidad. Ángulos distintos entre sí.
+## FACEBOOK — 3 posts (EXTENSOS, retención de lectura)
+Cada uno mínimo ~450–700 palabras (historias 500–800). Prohibido posts de 4–10 líneas.
+Estructura: hook → desarrollo → historia/ejemplo → valor → prueba/objeción → CTA + pregunta.
+Ángulos distintos; al menos 1 de los 3 debe ser storytelling narrativo largo.
 
 ## INSTAGRAM — 3 piezas
 Estética "producto terminado", mensaje directo. Mezcla feed / carrusel premium / reel pulido si aporta (mínimo 1 feed o carrusel estético).
@@ -133,11 +149,16 @@ OBLIGATORIO: primero investiga con web_search (y x_search si ayuda) tendencias y
     id: "facebook",
     label: "Post Facebook",
     shortLabel: "Facebook",
-    prompt: `Genera 2 POSTS COMPLETOS solo para FACEBOOK (texto largo, estilo comunidad).
+    prompt: `Genera 2 POSTS COMPLETOS solo para FACEBOOK — texto EXTENSO de alta retención (estilo comunidad / muro).
 
 ${POST_FORMAT_RULES}
 
-Obligatorio: Red objetivo = Facebook en ambas. Texto largo listo para copiar; creativo = imagen de apoyo (no conviertas esto en reel de TikTok).`,
+Obligatorio:
+- Red objetivo = Facebook en ambas.
+- Cada post: mínimo ~450–700 palabras (si es historia, 500–800). Si queda corto, reescribe más largo ANTES de entregar.
+- Prohibido captions de 4–10 líneas. Debe invitar a “ver más” y sostener la lectura hasta el CTA.
+- Estructura de retención completa (hook, desarrollo, historia, valor, prueba, CTA+pregunta).
+- Creativo = imagen de apoyo opcional (el texto manda). No lo conviertas en reel de TikTok ni caption de IG.`,
   },
   {
     id: "instagram",
@@ -199,7 +220,7 @@ Módulo COPY & TEXTOS — senior de marketing digital y e-commerce multi-red.
 
 IDENTIFICACIÓN POR RED (crítico en cada sugerencia de RRSS):
 - Cada pieza debe llevar **Red objetivo: Facebook | Instagram | TikTok** y el copy/creativo debe nacer de ese ADN:
-  • Facebook = posts de texto largo, comunidad, narrativa.
+  • Facebook = posts e historias MUY largos (mín. ~450–700 palabras; nunca 4–10 líneas), retención de lectura, comunidad, narrativa.
   • TikTok = reels (a veces imágenes deslizables), ritmo, hook 0–3s.
   • Instagram = "producto terminado", estético, mensaje directo y caption nativo (no ensayo FB).
 - Nunca un único copy genérico "para todas las redes". Si el usuario no elige red, ofrece variantes por red o pregunta cuál priorizar.
